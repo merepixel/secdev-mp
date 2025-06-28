@@ -1,6 +1,9 @@
 
 package View;
 
+import javax.swing.JOptionPane;
+import Controller.HashPassword;
+
 public class Register extends javax.swing.JPanel {
 
     public Frame frame;
@@ -96,8 +99,38 @@ public class Register extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    
+    //issue: empty or invalid usernames/passwords are not checked
+    //issue: could crash or allow empty accounts
+    //issue: unmatched passwords still proceed (note: register so need to validate)
+    //issue: no hashing
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
-        frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
+        //frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
+        String username = usernameFld.getText().trim();
+        String password = passwordFld.getText().trim();
+        String confirmPassword = confpassFld.getText().trim();
+
+        // solution: input validation
+        if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "All fields are required.");
+            return;
+        }
+
+        // solution: check password confirmation, ok to say
+        if (!password.equals(confirmPassword)) {
+            JOptionPane.showMessageDialog(this, "Passwords do not match.");
+            return;
+        }
+
+        // solution: enforce strong password policy??
+        if (password.length() < 8) {
+            JOptionPane.showMessageDialog(this, "Password must be at least 8 characters.");
+            return;
+        }
+        
+        // solution: hashed pw
+        String hashedPassword = HashPassword.hashPassword(password); 
+        frame.registerAction(username, hashedPassword, hashedPassword); 
         frame.loginNav();
     }//GEN-LAST:event_registerBtnActionPerformed
 

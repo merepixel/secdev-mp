@@ -256,6 +256,30 @@ public class Frame extends javax.swing.JFrame {
         frameView.show(Container, "registerPnl");
     }
     
+        public void adminNav() {
+        this.mainNav();
+        adminHomePnl.showPnl("home");
+        contentView.show(Content, "adminHomePnl");
+    }
+
+    public void managerNav() {
+        this.mainNav();
+        managerHomePnl.showPnl("home");
+        contentView.show(Content, "managerHomePnl");
+    }
+
+    public void staffNav() {
+        this.mainNav();
+        staffHomePnl.showPnl("home");
+        contentView.show(Content, "staffHomePnl");
+    }
+
+    public void clientNav() {
+        this.mainNav();
+        clientHomePnl.showPnl("home");
+        contentView.show(Content, "clientHomePnl");
+    }
+    
     public void registerAction(String username, String password, String confpass){
         main.sqlite.addUser(username, password);
     }

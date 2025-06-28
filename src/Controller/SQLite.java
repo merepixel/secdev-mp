@@ -279,24 +279,38 @@ public class SQLite {
         return users;
     }
     
-    public void addUser(String username, String password, int role) {
-        String sql = "INSERT INTO users(username,password,role) VALUES('" + username + "','" + password + "','" + role + "')";
+    public void addUser(String username, String hashedPassword, int role) {
+        // issue: plaintext password storage
+        // String sql = "INSERT INTO users(username,password,role) VALUES('" + username + "','" + password + "','" + role + "')";
+        String sql = "INSERT INTO users(username, password, role) VALUES (?, ?, ?)";
         
         try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement()){
-            stmt.execute(sql);
-            
+            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            pstmt.setString(2, hashedPassword);
+            pstmt.setInt(3, role);
+            pstmt.executeUpdate();
+    
         } catch (Exception ex) {
             System.out.print(ex);
         }
     }
     
+    
     public void removeUser(String username) {
-        String sql = "DELETE FROM users WHERE username='" + username + "';";
+        // issue: injection risk
+        // String sql = "DELETE FROM users WHERE username='" + username + "';";
+        String sql = "DELETE FROM users WHERE username=?";
 
         try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
+            
+            //Statement stmt = conn.createStatement()) {
+            //stmt.execute(sql);
+            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        
+            pstmt.setString(1, username);
+            pstmt.executeUpdate();
+            
             System.out.println("User " + username + " has been deleted.");
         } catch (Exception ex) {
             System.out.print(ex);
@@ -304,17 +318,62 @@ public class SQLite {
     }
     
     public Product getProduct(String name){
-        String sql = "SELECT name, stock, price FROM product WHERE name='" + name + "';";
+        // issue: injection risk
+        // String sql = "SELECT name, stock, price FROM product WHERE name='" + name + "';";
+        String sql = "SELECT name, stock, price FROM product WHERE name = ?";
         Product product = null;
+        
         try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql)){
-            product = new Product(rs.getString("name"),
-                                   rs.getInt("stock"),
-                                   rs.getFloat("price"));
+            //Statement stmt = conn.createStatement();
+            //ResultSet rs = stmt.executeQuery(sql)){
+       
+            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, name);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    product = new Product(
+                        rs.getString("name"),
+                        rs.getInt("stock"),
+                        rs.getFloat("price")
+                    );
+                }
+            }
+            
         } catch (Exception ex) {
             System.out.print(ex);
         }
         return product;
     }
+    
+    public User validateLogin(String username, String passwordPlaintext) {
+        String sql = "SELECT id, username, password, role, locked FROM users WHERE username = ?";
+
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                String storedHash = rs.getString("password");
+                String hashedInput = HashPassword.hashPassword(passwordPlaintext);
+
+                if (storedHash.equals(hashedInput)) {
+                    return new User(
+                        rs.getInt("id"),
+                        rs.getString("username"),
+                        storedHash,
+                        rs.getInt("role"),
+                        rs.getInt("locked")
+                    );
+                }
+            }
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+
+        return null; // login failed
+    }
+    
 }

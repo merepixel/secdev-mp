@@ -1,6 +1,13 @@
 
 package View;
 
+import javax.swing.JOptionPane;
+import Controller.SQLite;
+import Controller.HashPassword;
+import Model.User;
+import View.Frame;
+
+
 public class Login extends javax.swing.JPanel {
 
     public Frame frame;
@@ -8,6 +15,8 @@ public class Login extends javax.swing.JPanel {
     public Login() {
         initComponents();
     }
+    
+    
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -83,7 +92,44 @@ public class Login extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
     private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
-        frame.mainNav();
+        //frame.mainNav();
+        String username = usernameFld.getText().trim();
+        String password = passwordFld.getText().trim();
+
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Username and password are required.");
+            return;
+        }
+
+        SQLite db = new SQLite();
+
+        // Validate login (this function compares hashed passwords)
+        User user = db.validateLogin(username, password);
+
+        if (user == null) {
+            JOptionPane.showMessageDialog(this, "Incorrect username or password.");
+            return;
+        }
+
+        // rolebased
+        switch (user.getRole()) {
+            case 5: // Admin
+                frame.adminNav();
+                break;
+            case 4: // Manager
+                frame.managerNav();
+                break;
+            case 3: // Staff
+                frame.staffNav();
+                break;
+            case 2: // Client
+                frame.clientNav();
+                break;
+            default:
+                JOptionPane.showMessageDialog(this, "Your account has no access privileges.");
+                break;
+        }
+        
     }//GEN-LAST:event_loginBtnActionPerformed
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
