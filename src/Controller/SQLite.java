@@ -12,7 +12,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 public class SQLite {
-    
     public int DEBUG_MODE = 0;
     String driverURL = "jdbc:sqlite:" + "database.db";
     
