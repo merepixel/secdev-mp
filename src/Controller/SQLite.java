@@ -10,10 +10,51 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.sql.SQLException;
+import java.io.File;
+
 
 public class SQLite {
     public int DEBUG_MODE = 0;
-    String driverURL = "jdbc:sqlite:" + "database.db";
+    private Connection conn;
+    String driverURL;
+
+   
+    
+    public SQLite() {
+        // Resolve relative path to project root where database.db is located
+        File dbFile = new File(System.getProperty("user.dir"), "database.db");
+        driverURL = "jdbc:sqlite:" + dbFile.getAbsolutePath();
+        System.out.println("Connecting to DB: " + driverURL);
+        
+        File dbFile2 = new File("/Users/armina/Downloads/CSSECDVmp/database.db");
+        System.out.println("DB Path: " + dbFile2.getAbsolutePath());
+        System.out.println("Exists: " + dbFile2.exists());
+        System.out.println("Readable: " + dbFile2.canRead());
+            }
+
+    public void connect() {
+        try {
+            conn = DriverManager.getConnection(driverURL);
+            
+            
+        } catch (SQLException e) {
+            System.err.println("SQLException: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public void close() {
+        try {
+            if (conn != null) conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Connection getConnection() {
+        return conn;
+    }
     
     public void createNewDatabase() {
         try (Connection conn = DriverManager.getConnection(driverURL)) {
@@ -178,23 +219,23 @@ public class SQLite {
         }
     }
     
-    public void addUser(String username, String password) {
-        String sql = "INSERT INTO users(username,password) VALUES('" + username + "','" + password + "')";
-        
-        try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement()){
-            stmt.execute(sql);
-            
-//      PREPARED STATEMENT EXAMPLE
-//      String sql = "INSERT INTO users(username,password) VALUES(?,?)";
-//      PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//      pstmt.setString(1, username);
-//      pstmt.setString(2, password);
-//      pstmt.executeUpdate();
-        } catch (Exception ex) {
-            System.out.print(ex);
-        }
-    }
+//    public void addUser(String username, String password) {
+//        String sql = "INSERT INTO users(username,password) VALUES('" + username + "','" + password + "')";
+//        
+//        try (Connection conn = DriverManager.getConnection(driverURL);
+//            Statement stmt = conn.createStatement()){
+//            stmt.execute(sql);
+//            
+////      PREPARED STATEMENT EXAMPLE
+////      String sql = "INSERT INTO users(username,password) VALUES(?,?)";
+////      PreparedStatement pstmt = conn.prepareStatement(sql)) {
+////      pstmt.setString(1, username);
+////      pstmt.setString(2, password);
+////      pstmt.executeUpdate();
+//        } catch (Exception ex) {
+//            System.out.print(ex);
+//        }
+//    }
     
     
     public ArrayList<History> getHistory(){
@@ -357,6 +398,9 @@ public class SQLite {
             if (rs.next()) {
                 String storedHash = rs.getString("password");
                 String hashedInput = HashPassword.hashPassword(passwordPlaintext);
+                
+                System.out.println("Hashed input: " + hashedInput);
+                System.out.println("Stored hash: " + storedHash);
 
                 if (storedHash.equals(hashedInput)) {
                     return new User(

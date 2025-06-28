@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import javax.swing.WindowConstants;
+import Controller.HashPassword;
 
 public class Frame extends javax.swing.JFrame {
 
@@ -280,8 +281,9 @@ public class Frame extends javax.swing.JFrame {
         contentView.show(Content, "clientHomePnl");
     }
     
-    public void registerAction(String username, String password, String confpass){
-        main.sqlite.addUser(username, password);
+    public void registerAction(String username, String hashedPassword, String confpass){
+        //main.sqlite.addUser(username, password);
+        main.sqlite.addUser(username, hashedPassword, 2);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
