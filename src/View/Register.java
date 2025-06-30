@@ -156,3 +156,4 @@ public class Register extends javax.swing.JPanel {
     private javax.swing.JTextField usernameFld;
     // End of variables declaration//GEN-END:variables
 }
+

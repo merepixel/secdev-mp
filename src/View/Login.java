@@ -16,8 +16,6 @@ public class Login extends javax.swing.JPanel {
         initComponents();
     }
     
-    
-
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -91,6 +89,9 @@ public class Login extends javax.swing.JPanel {
                 .addContainerGap(126, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
+
+
+    // solution: empty fields
     private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
         //frame.mainNav();
         String username = usernameFld.getText().trim();
@@ -103,7 +104,7 @@ public class Login extends javax.swing.JPanel {
 
         SQLite db = new SQLite();
 
-        // Validate login (this function compares hashed passwords)
+        // solution: validate login (this function compares hashed passwords)
         User user = db.validateLogin(username, password);
 
         if (user == null) {
@@ -111,7 +112,7 @@ public class Login extends javax.swing.JPanel {
             return;
         }
 
-        // rolebased
+        // solution: rolebased view
         switch (user.getRole()) {
             case 5: // Admin
                 frame.adminNav();
