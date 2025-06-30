@@ -3,6 +3,7 @@ package View;
 
 import javax.swing.JOptionPane;
 import Controller.HashPassword;
+import Controller.SQLite;
 
 public class Register extends javax.swing.JPanel {
 
@@ -125,6 +126,13 @@ public class Register extends javax.swing.JPanel {
         // solution: enforce strong password policy??
         if (password.length() < 8) {
             JOptionPane.showMessageDialog(this, "Password must be at least 8 characters.");
+            return;
+        }
+
+        // solution: check if username already exists, is this ok/secure?
+        SQLite db = new SQLite();
+        if (db.usernameExists(username)) {
+            JOptionPane.showMessageDialog(this, "Username already exists. Please choose another.");
             return;
         }
         

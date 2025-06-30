@@ -356,6 +356,21 @@ public class SQLite {
             System.out.print(ex);
         }
     }
+
+    public boolean usernameExists(String username) {
+        String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;  // returns true if username already exists
+            }
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+        return false;
+    }
     
     public Product getProduct(String name){
         // issue: injection risk
