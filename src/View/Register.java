@@ -121,15 +121,25 @@ public class Register extends javax.swing.JPanel {
             return;
         }
 
-        // solution: check password confirmation, ok to say
+        // solution: check password confirmation
         if (!password.equals(confirmPassword)) {
             JOptionPane.showMessageDialog(this, "Passwords do not match.");
             return;
         }
 
         // solution: enforce strong password policy
-        if (password.length() < 8) {
-            JOptionPane.showMessageDialog(this, "Password must be at least 8 characters.");
+        String passwordPattern = 
+            "^(?=.*[0-9])" +              // At least one digit
+            "(?=.*[a-z])" +               // At least one lowercase letter
+            "(?=.*[A-Z])" +               // At least one uppercase letter
+            "(?=.*[\\W_])" +              // At least one special character (non-word character or underscore)
+            ".{12,}$";                    // Minimum length of 12 characters
+
+        if (!password.matches(passwordPattern)) {
+            JOptionPane.showMessageDialog(this, 
+                "Password must be at least 12 characters long, " +
+                "and include a mix of upper and lower case letters, " +
+                "at least one numerical digit and a special character.");
             return;
         }
 
