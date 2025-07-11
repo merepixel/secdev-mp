@@ -10,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 
@@ -321,27 +322,63 @@ public class SQLite {
         } catch (Exception ex) {}
         return users;
     }
-    
-    public void addUser(String username, String hashedPassword, int role) {
-        // issue: plaintext password storage
-        // String sql = "INSERT INTO users(username,password,role) VALUES('" + username + "','" + password + "','" + role + "')";
+
+    public boolean addUser(String username, String rawPassword, int role) {
+        // Hash password before storing
+        String hashedPassword = HashPassword.hashPassword(rawPassword);
+
         String sql = "INSERT INTO users(username, password, role) VALUES (?, ?, ?)";
-        
         try (Connection conn = DriverManager.getConnection(driverURL);
             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, username);
             pstmt.setString(2, hashedPassword);
             pstmt.setInt(3, role);
             pstmt.executeUpdate();
-    
+            return true;
+
         } catch (Exception ex) {
             System.out.print(ex);
+            return false;
         }
+    }
+
+
+    public String validatePassword(String password, String username) {
+        List<String> errors = new ArrayList<>();
+
+        if (password.length() < 8 || password.length() > 64) {
+            errors.add("• Password must be between 8 and 64 characters.");
+        }
+
+        if (password.toLowerCase().contains(username.toLowerCase())) {
+            errors.add("• Password should not contain your username.");
+        }
+
+        boolean hasLower = false;
+        boolean hasUpper = false;
+        boolean hasDigit = false;
+        boolean hasSpecial = false;
+
+        for (char c : password.toCharArray()) {
+            if (Character.isLowerCase(c)) hasLower = true;
+            else if (Character.isUpperCase(c)) hasUpper = true;
+            else if (Character.isDigit(c)) hasDigit = true;
+            else hasSpecial = true;
+        }
+
+        if (!hasLower) errors.add("• Must contain at least one lowercase letter.");
+        if (!hasUpper) errors.add("• Must contain at least one uppercase letter.");
+        if (!hasDigit) errors.add("• Must contain at least one number.");
+        if (!hasSpecial) errors.add("• Must contain at least one special character.");
+
+        if (errors.isEmpty()) return null;
+        return String.join("\n", errors);
     }
 
     public boolean registerUser(String username, String password, String confirmPassword) {
         if (username == null || password == null || confirmPassword == null) {
-            System.out.println("Registration failed: missing fields.");
+            JOptionPane.showMessageDialog(null, "Fields cannot be null.");
             return false;
         }
 
@@ -350,32 +387,32 @@ public class SQLite {
         confirmPassword = confirmPassword.trim();
 
         if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            System.out.println("Registration failed: empty fields.");
+            JOptionPane.showMessageDialog(null, "All fields are required.");
             return false;
         }
 
         if (!password.equals(confirmPassword)) {
-            System.out.println("Registration failed: passwords do not match.");
+            JOptionPane.showMessageDialog(null, "Passwords do not match.");
             return false;
         }
 
         if (usernameExists(username)) {
-            System.out.println("Registration failed: username already exists.");
+            JOptionPane.showMessageDialog(null, "Username already exists.");
             return false;
         }
 
-        String passwordPattern =
-            "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[\\W_]).{12,}$";
-        if (!password.matches(passwordPattern)) {
-            System.out.println("Registration failed: weak password.");
+        String passwordValidationMessage = validatePassword(password, username);
+        if (passwordValidationMessage != null) {
+            JOptionPane.showMessageDialog(null, "Registration failed: " + passwordValidationMessage);
             return false;
         }
 
         String hashedPassword = HashPassword.hashPassword(password);
-        addUser(username, hashedPassword, 2);  // 2 = default role
+        addUser(username, hashedPassword, 2); // Default role
         return true;
     }
     
+
     public void removeUser(String username) {
         // issue: injection risk
         // String sql = "DELETE FROM users WHERE username='" + username + "';";

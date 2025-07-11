@@ -117,17 +117,26 @@ public class Register extends javax.swing.JPanel {
         String confirmPassword = confpassFld.getText().trim();
 
         SQLite db = new SQLite();
-        boolean success = db.registerUser(username, password, confirmPassword);
 
+        // First check if passwords match
+        if (!password.equals(confirmPassword)) {
+            JOptionPane.showMessageDialog(this, "Passwords do not match.");
+            return;
+        }
+
+        // Validate password policy
+        String errorMessage = db.validatePassword(password, username);
+        if (errorMessage != null) {
+            JOptionPane.showMessageDialog(this, errorMessage);
+            return;
+        }
+
+        boolean success = db.addUser(username, password, 2);
         if (success) {
             JOptionPane.showMessageDialog(this, "Registration successful.");
             frame.loginNav();
         } else {
-            JOptionPane.showMessageDialog(this, 
-                "Password must be at least 12 characters long, " +
-                "Include a mix of upper and lower case letters, " +
-                "At least one numerical digit and a special character.");
-            return;
+            JOptionPane.showMessageDialog(this, "Registration failed. Username may already exist.");
         }
     } //GEN-LAST:event_registerBtnActionPerformed
 
