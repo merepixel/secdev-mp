@@ -365,7 +365,7 @@ public class SQLite {
         }
 
         String passwordPattern =
-            "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[\\W_]).{12,}$";
+            "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[\\W_]).{8,}$";
         if (!password.matches(passwordPattern)) {
             System.out.println("Registration failed: weak password.");
             return false;
