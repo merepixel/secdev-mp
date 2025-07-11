@@ -123,22 +123,21 @@ public class Register extends javax.swing.JPanel {
             return;
         }
 
-        // solution: enforce strong password policy??
+        // solution: enforce strong password policy
         if (password.length() < 8) {
             JOptionPane.showMessageDialog(this, "Password must be at least 8 characters.");
             return;
         }
 
-        // solution: check if username already exists, is this ok/secure?
+        // solution: check if username already exists
         SQLite db = new SQLite();
         if (db.usernameExists(username)) {
             JOptionPane.showMessageDialog(this, "Username already exists. Please choose another.");
             return;
         }
         
-        // solution: hashed pw
-        String hashedPassword = HashPassword.hashPassword(password); 
-        frame.registerAction(username, hashedPassword, hashedPassword); 
+        // solution: password is hashed inside the registerAction method
+        frame.registerAction(username, password); 
         frame.loginNav();
     }//GEN-LAST:event_registerBtnActionPerformed
 

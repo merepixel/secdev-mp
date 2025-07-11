@@ -281,8 +281,10 @@ public class Frame extends javax.swing.JFrame {
         contentView.show(Content, "clientHomePnl");
     }
     
-    public void registerAction(String username, String hashedPassword, String confpass){
+    // solution: password is hashed inside the registerAction method
+    public void registerAction(String username, String password){
         //main.sqlite.addUser(username, password);
+        String hashedPassword = HashPassword.hashPassword(password);
         main.sqlite.addUser(username, hashedPassword, 2);
     }
 
