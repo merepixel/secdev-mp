@@ -20,9 +20,12 @@ public class Login extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        // issue: Password fields should be JPasswordField, not JTextField
+        // solution: Use JPasswordField for password fields
         jLabel1 = new javax.swing.JLabel();
         usernameFld = new javax.swing.JTextField();
-        passwordFld = new javax.swing.JTextField();
+        passwordFld = new javax.swing.JPasswordField();
+        //passwordFld = new javax.swing.JTextField();
         registerBtn = new javax.swing.JButton();
         loginBtn = new javax.swing.JButton();
 

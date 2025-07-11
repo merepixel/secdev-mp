@@ -17,11 +17,15 @@ public class Register extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        // issue: Password fields should be JPasswordField, not JTextField
+        // solution: Use JPasswordField for password and confirm password fields
         registerBtn = new javax.swing.JButton();
-        passwordFld = new javax.swing.JTextField();
+        passwordFld = new javax.swing.JPasswordField();
+        //passwordFld = new javax.swing.JTextField();
         usernameFld = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
-        confpassFld = new javax.swing.JTextField();
+        confpassFld = new javax.swing.JPasswordField();
+        //confpassFld = new javax.swing.JTextField();
         backBtn = new javax.swing.JButton();
 
         registerBtn.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
