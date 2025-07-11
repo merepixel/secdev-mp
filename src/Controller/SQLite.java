@@ -39,8 +39,7 @@ public class SQLite {
             
             
         } catch (SQLException e) {
-            System.err.println("SQLException: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("An error occurred while processing your request. Please try again.");
         }
     }
 
@@ -413,9 +412,6 @@ public class SQLite {
             if (rs.next()) {
                 String storedHash = rs.getString("password");
                 String hashedInput = HashPassword.hashPassword(passwordPlaintext);
-                
-                System.out.println("Hashed input: " + hashedInput);
-                System.out.println("Stored hash: " + storedHash);
 
                 if (storedHash.equals(hashedInput)) {
                     return new User(
