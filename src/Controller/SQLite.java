@@ -10,6 +10,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+
+import javax.swing.JOptionPane;
+
 import java.sql.SQLException;
 import java.io.File;
 
@@ -18,8 +21,7 @@ public class SQLite {
     public int DEBUG_MODE = 0;
     private Connection conn;
     String driverURL;
-
-   
+    public MemoryTimeout timeoutTracker = MemoryTimeout.getInstance();
     
     public SQLite() {
         // Resolve relative path to project root where database.db is located
@@ -403,6 +405,12 @@ public class SQLite {
     }
     
     public User validateLogin(String username, String passwordPlaintext) {
+
+        if (timeoutTracker.isLocked(username)) {
+            JOptionPane.showMessageDialog(null, "Account locked due to too many failed login attempts. Please try again later.");
+            return null;
+        } // login failed due to rate limiting
+
         String sql = "SELECT id, username, password, role, locked FROM users WHERE username = ?";
 
         try (Connection conn = DriverManager.getConnection(driverURL);

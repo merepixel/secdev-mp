@@ -4,6 +4,7 @@ package View;
 import javax.swing.JOptionPane;
 import Controller.SQLite;
 import Controller.HashPassword;
+import Controller.MemoryTimeout;
 import Model.User;
 import View.Frame;
 
@@ -15,6 +16,7 @@ public class Login extends javax.swing.JPanel {
     public Login() {
         initComponents();
     }
+    
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -110,10 +112,21 @@ public class Login extends javax.swing.JPanel {
         // solution: validate login (this function compares hashed passwords)
         User user = db.validateLogin(username, password);
 
+        MemoryTimeout timeoutTracker = MemoryTimeout.getInstance();
+
         if (user == null) {
             JOptionPane.showMessageDialog(this, "Incorrect username or password.");
+            timeoutTracker.incrementFailedAttempts(username);
+            
+            if (timeoutTracker.isLocked(username)) {
+                JOptionPane.showMessageDialog(this, 
+                    "Account locked due to too many failed attempts. Please try again later.");
+            }
             return;
         }
+
+        // Successful login
+        timeoutTracker.resetFailedAttempts(username);
 
         // solution: rolebased view
         switch (user.getRole()) {
