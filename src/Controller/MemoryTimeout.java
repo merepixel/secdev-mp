@@ -38,19 +38,16 @@ public class MemoryTimeout {
     public void incrementFailedAttempts(String username) {
         loginAttempts.compute(username, (key, attempt) -> {
             if (attempt == null) {
-                System.out.println("First failed attempt for: " + username);
                 return new LoginAttempt(1, System.currentTimeMillis());
             }
             attempt.incrementFailedAttempts();
             attempt.setLastAttempt(System.currentTimeMillis());
-            System.out.println("Failed attempts for " + username + ": " + attempt.getFailedAttempts());
             return attempt;
         });
     }
 
     public void resetFailedAttempts(String username) {
         loginAttempts.remove(username);
-        System.out.println("Reset failed attempts for: " + username);
     }
 
     private static class LoginAttempt {
