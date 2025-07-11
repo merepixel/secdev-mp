@@ -338,7 +338,43 @@ public class SQLite {
             System.out.print(ex);
         }
     }
-    
+
+    public boolean registerUser(String username, String password, String confirmPassword) {
+        if (username == null || password == null || confirmPassword == null) {
+            System.out.println("Registration failed: missing fields.");
+            return false;
+        }
+
+        username = username.trim();
+        password = password.trim();
+        confirmPassword = confirmPassword.trim();
+
+        if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            System.out.println("Registration failed: empty fields.");
+            return false;
+        }
+
+        if (!password.equals(confirmPassword)) {
+            System.out.println("Registration failed: passwords do not match.");
+            return false;
+        }
+
+        if (usernameExists(username)) {
+            System.out.println("Registration failed: username already exists.");
+            return false;
+        }
+
+        String passwordPattern =
+            "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[\\W_]).{12,}$";
+        if (!password.matches(passwordPattern)) {
+            System.out.println("Registration failed: weak password.");
+            return false;
+        }
+
+        String hashedPassword = HashPassword.hashPassword(password);
+        addUser(username, hashedPassword, 2);  // 2 = default role
+        return true;
+    }
     
     public void removeUser(String username) {
         // issue: injection risk

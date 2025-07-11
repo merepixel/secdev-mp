@@ -109,51 +109,27 @@ public class Register extends javax.swing.JPanel {
     //issue: could crash or allow empty accounts
     //issue: unmatched passwords still proceed (note: register so need to validate)
     //issue: no hashing
-    private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
-        //frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
+
+
+    private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {
         String username = usernameFld.getText().trim();
         String password = passwordFld.getText().trim();
         String confirmPassword = confpassFld.getText().trim();
 
-        // solution: input validation
-        if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "All fields are required.");
-            return;
-        }
+        SQLite db = new SQLite();
+        boolean success = db.registerUser(username, password, confirmPassword);
 
-        // solution: check password confirmation
-        if (!password.equals(confirmPassword)) {
-            JOptionPane.showMessageDialog(this, "Passwords do not match.");
-            return;
-        }
-
-        // solution: enforce strong password policy
-        String passwordPattern = 
-            "^(?=.*[0-9])" +              // At least one digit
-            "(?=.*[a-z])" +               // At least one lowercase letter
-            "(?=.*[A-Z])" +               // At least one uppercase letter
-            "(?=.*[\\W_])" +              // At least one special character (non-word character or underscore)
-            ".{12,}$";                    // Minimum length of 12 characters
-
-        if (!password.matches(passwordPattern)) {
+        if (success) {
+            JOptionPane.showMessageDialog(this, "Registration successful.");
+            frame.loginNav();
+        } else {
             JOptionPane.showMessageDialog(this, 
                 "Password must be at least 12 characters long, " +
-                "and include a mix of upper and lower case letters, " +
-                "at least one numerical digit and a special character.");
+                "Include a mix of upper and lower case letters, " +
+                "At least one numerical digit and a special character.");
             return;
         }
-
-        // solution: check if username already exists
-        SQLite db = new SQLite();
-        if (db.usernameExists(username)) {
-            JOptionPane.showMessageDialog(this, "Username already exists. Please choose another.");
-            return;
-        }
-        
-        // solution: password is hashed inside the registerAction method
-        frame.registerAction(username, password); 
-        frame.loginNav();
-    }//GEN-LAST:event_registerBtnActionPerformed
+    } //GEN-LAST:event_registerBtnActionPerformed
 
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
         frame.loginNav();
