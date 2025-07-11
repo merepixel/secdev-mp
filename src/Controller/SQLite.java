@@ -23,11 +23,13 @@ public class SQLite {
     
     public SQLite() {
         // Resolve relative path to project root where database.db is located
-        File dbFile = new File(System.getProperty("user.dir"), "database.db");
+        //File dbFile = new File(System.getProperty("user.dir"), "database.db"); // Yna
+        File dbFile = new File(System.getProperty("user.dir"), "database.db"); // Vinnie
         driverURL = "jdbc:sqlite:" + dbFile.getAbsolutePath();
         System.out.println("Connecting to DB: " + driverURL);
         
-        File dbFile2 = new File("/Users/armina/Downloads/CSSECDVmp/database.db");
+        // File dbFile2 = new File("/Users/armina/Downloads/CSSECDVmp/database.db"); // Yna
+        File dbFile2 = new File("/Users/vinni/Desktop/Code Repositories/SECDEV-MP/database.db"); // Vinnie
         System.out.println("DB Path: " + dbFile2.getAbsolutePath());
         System.out.println("Exists: " + dbFile2.exists());
         System.out.println("Readable: " + dbFile2.canRead());
