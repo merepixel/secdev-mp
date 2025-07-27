@@ -6,8 +6,19 @@ import java.awt.CardLayout;
 import java.awt.Dimension;
 import javax.swing.WindowConstants;
 import Controller.HashPassword;
+import Model.User;
 
 public class Frame extends javax.swing.JFrame {
+
+    private User currentUser = null;
+
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+    }
+
+    public User getCurrentUser() {
+        return this.currentUser;
+    }
 
     public Frame() {
         initComponents();
@@ -181,21 +192,37 @@ public class Frame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void adminBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminBtnActionPerformed
+        if (currentUser == null || currentUser.getRole() != 5) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Access denied.");
+            return;
+        }
         adminHomePnl.showPnl("home");
         contentView.show(Content, "adminHomePnl");
     }//GEN-LAST:event_adminBtnActionPerformed
 
     private void managerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_managerBtnActionPerformed
+        if (currentUser == null || currentUser.getRole() != 4) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Access denied.");
+            return;
+        }
         managerHomePnl.showPnl("home");
         contentView.show(Content, "managerHomePnl");
     }//GEN-LAST:event_managerBtnActionPerformed
 
     private void staffBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_staffBtnActionPerformed
+        if (currentUser == null || currentUser.getRole() != 3) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Access denied.");
+            return;
+        }
         staffHomePnl.showPnl("home");
         contentView.show(Content, "staffHomePnl");
     }//GEN-LAST:event_staffBtnActionPerformed
 
     private void clientBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientBtnActionPerformed
+        if (currentUser == null || currentUser.getRole() != 2) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Access denied.");
+            return;
+        }
         clientHomePnl.showPnl("home");
         contentView.show(Content, "clientHomePnl");
     }//GEN-LAST:event_clientBtnActionPerformed
@@ -246,6 +273,13 @@ public class Frame extends javax.swing.JFrame {
     }
     
     public void mainNav(){
+        User user = getCurrentUser();
+
+        adminBtn.setEnabled(user.getRole() == 5);
+        managerBtn.setEnabled(user.getRole() == 4);
+        staffBtn.setEnabled(user.getRole() == 3);
+        clientBtn.setEnabled(user.getRole() == 2);
+
         frameView.show(Container, "homePnl");
     }
     

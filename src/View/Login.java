@@ -125,6 +125,8 @@ public class Login extends javax.swing.JPanel {
         // Successful login
         timeoutTracker.resetFailedAttempts(username);
 
+        frame.setCurrentUser(user);
+
         // solution: rolebased view
         switch (user.getRole()) {
             case 5: // Admin
