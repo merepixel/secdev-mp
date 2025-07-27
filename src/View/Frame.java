@@ -228,6 +228,13 @@ public class Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_clientBtnActionPerformed
 
     private void logoutBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutBtnActionPerformed
+        setCurrentUser(null);
+
+        adminBtn.setVisible(false);
+        managerBtn.setVisible(false);
+        staffBtn.setVisible(false);
+        clientBtn.setVisible(false);
+
         frameView.show(Container, "loginPnl");
     }//GEN-LAST:event_logoutBtnActionPerformed
 
@@ -275,10 +282,10 @@ public class Frame extends javax.swing.JFrame {
     public void mainNav(){
         User user = getCurrentUser();
 
-        adminBtn.setEnabled(user.getRole() == 5);
-        managerBtn.setEnabled(user.getRole() == 4);
-        staffBtn.setEnabled(user.getRole() == 3);
-        clientBtn.setEnabled(user.getRole() == 2);
+        adminBtn.setVisible(user.getRole() == 5);
+        managerBtn.setVisible(user.getRole() == 4);
+        staffBtn.setVisible(user.getRole() == 3);
+        clientBtn.setVisible(user.getRole() == 2);
 
         frameView.show(Container, "homePnl");
     }
