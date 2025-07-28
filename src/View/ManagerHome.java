@@ -22,9 +22,7 @@ import javax.swing.table.DefaultTableModel;
 public class ManagerHome extends javax.swing.JPanel {
 
     public MgmtHistory mgmtHistory;
-    public MgmtLogs mgmtLogs;
     public MgmtProduct mgmtProduct;
-    public MgmtUser mgmtUser;
     
     private CardLayout contentView = new CardLayout();
     
@@ -37,25 +35,21 @@ public class ManagerHome extends javax.swing.JPanel {
         mgmtHistory.setCurrentUser(currentUser);
         mgmtHistory.init();        
         
-        mgmtLogs = new MgmtLogs(sqlite);
 
         mgmtProduct = new MgmtProduct(sqlite);
         mgmtProduct.setCurrentUser(currentUser);
         
-        mgmtUser = new MgmtUser(sqlite);
     
         Content.setLayout(contentView);
         Content.add(new Home("WELCOME MANAGER!", new java.awt.Color(153,102,255)), "home");
-        Content.add(mgmtUser, "mgmtUser");
         Content.add(mgmtHistory, "mgmtHistory");
         Content.add(mgmtProduct, "mgmtProduct");
-        Content.add(mgmtLogs, "mgmtLogs");
         
 //        UNCOMMENT TO DISABLE BUTTONS
 //        historyBtn.setVisible(false);
-//        usersBtn.setVisible(false);
+        usersBtn.setVisible(false);
 //        productsBtn.setVisible(false);
-//        logsBtn.setVisible(false);
+        logsBtn.setVisible(false);
     }
     
     public void showPnl(String panelName){
@@ -84,7 +78,7 @@ public class ManagerHome extends javax.swing.JPanel {
         usersBtn.setText("USERS");
         usersBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                usersBtnActionPerformed(evt);
+                //usersBtnActionPerformed(evt);
             }
         });
 
@@ -124,7 +118,7 @@ public class ManagerHome extends javax.swing.JPanel {
         logsBtn.setText("LOGS");
         logsBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                logsBtnActionPerformed(evt);
+                //logsBtnActionPerformed(evt);
             }
         });
 
@@ -161,14 +155,6 @@ public class ManagerHome extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void usersBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usersBtnActionPerformed
-        mgmtUser.init();
-        usersBtn.setForeground(Color.red);
-        productsBtn.setForeground(Color.black);
-        historyBtn.setForeground(Color.black);
-        logsBtn.setForeground(Color.black);
-        contentView.show(Content, "mgmtUser");
-    }//GEN-LAST:event_usersBtnActionPerformed
 
     private void productsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productsBtnActionPerformed
         mgmtProduct.init();
@@ -188,15 +174,6 @@ public class ManagerHome extends javax.swing.JPanel {
         contentView.show(Content, "mgmtHistory");
     }//GEN-LAST:event_historyBtnActionPerformed
 
-    private void logsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logsBtnActionPerformed
-        mgmtLogs.init();
-        usersBtn.setForeground(Color.black);
-        productsBtn.setForeground(Color.black);
-        historyBtn.setForeground(Color.black);
-        logsBtn.setForeground(Color.red);
-        contentView.show(Content, "mgmtLogs");
-    }//GEN-LAST:event_logsBtnActionPerformed
-    
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

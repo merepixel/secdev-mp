@@ -206,44 +206,53 @@ public class MgmtHistory extends javax.swing.JPanel {
                 return;
             }
 
-            String searchText = searchFld.getText().trim();
+            String searchText = searchFld.getText().trim().toLowerCase();
 
             if (searchText.isEmpty() || searchText.length() > 100) {
                 JOptionPane.showMessageDialog(null, "Please enter a valid search keyword (max 100 characters).");
                 return;
             }
 
-//          CLEAR TABLE
-            for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
+            // CLEAR TABLE
+            while (tableModel.getRowCount() > 0) {
                 tableModel.removeRow(0);
             }
 
-//          LOAD CONTENTS
-            ArrayList<History> history = sqlite.getHistory(currentUser);
-            for (History h : history) {
-                Product product = sqlite.getProduct(h.getName());
+            // LOAD AND FILTER CONTENTS
+            ArrayList<History> historyList = sqlite.getHistory(currentUser);
 
-                if (product != null) {
-                    tableModel.addRow(new Object[]{
-                        h.getUsername(),
-                        h.getName(),
-                        h.getStock(),
-                        product.getPrice(),
-                        product.getPrice() * h.getStock(),
-                        h.getTimestamp()
-                    });
-                } else {
-                    // Gracefully handle orphaned history entries
-                    System.err.println("⚠ Product not found: " + h.getName());
-                    tableModel.addRow(new Object[]{
-                        h.getUsername(),
-                        h.getName(),
-                        h.getStock(),
-                        "N/A",
-                        "N/A",
-                        h.getTimestamp()
-                    });
+            for (History h : historyList) {
+                String username = h.getUsername().toLowerCase();
+                String productName = h.getName().toLowerCase();
+
+                if (username.contains(searchText) || productName.contains(searchText)) {
+                    Product product = sqlite.getProduct(h.getName());
+
+                    if (product != null) {
+                        double price = product.getPrice();
+                        tableModel.addRow(new Object[]{
+                            h.getUsername(),
+                            h.getName(),
+                            h.getStock(),
+                            price,
+                            price * h.getStock(),
+                            h.getTimestamp()
+                        });
+                    } else {
+                        tableModel.addRow(new Object[]{
+                            h.getUsername(),
+                            h.getName(),
+                            h.getStock(),
+                            "N/A",
+                            "N/A",
+                            h.getTimestamp()
+                        });
+                    }
                 }
+            }
+
+            if (tableModel.getRowCount() == 0) {
+                JOptionPane.showMessageDialog(this, "No matching results found.");
             }
         }
     }//GEN-LAST:event_searchBtnActionPerformed
