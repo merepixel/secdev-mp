@@ -5,6 +5,7 @@
  */
 package Model;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,32 +23,28 @@ public class Logs {
     private String desc;
     private Timestamp timestamp;
 
-    private SimpleDateFormat dateformat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a");
+    //private SimpleDateFormat dateformat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a");
     
-    public Logs(String event, String desc){
+    public Logs(String event, String desc, Timestamp timestamp){
         this.event = event;
         this.username = "NONE";
         this.desc = desc;
-        this.timestamp = new Timestamp(new Date().getTime());
+        this.timestamp = timestamp;
     }
     
-    public Logs(String event, String username, String desc){
+    public Logs(String event, String username, String desc, Timestamp timestamp){
         this.event = event;
         this.username = username;
         this.desc = desc;
-        this.timestamp = new Timestamp(new Date().getTime());
+        this.timestamp = timestamp;
     }
     
-    public Logs(int id, String event, String username, String desc, String timestamp){
+    public Logs(int id, String event, String username, String desc, Timestamp timestamp){
         this.id = id;
         this.event = event;
         this.username = username;
         this.desc = desc;
-        try {
-            this.timestamp = new Timestamp(dateformat.parse(timestamp).getTime());
-        } catch (ParseException ex) {
-            ex.printStackTrace();
-        }
+        this.timestamp = timestamp;
     }
     
     public int getId() {

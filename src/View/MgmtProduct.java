@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import Model.User;
+import java.sql.Timestamp;
 
 
 /**
@@ -268,8 +269,8 @@ public class MgmtProduct extends javax.swing.JPanel {
             }
 
             if (sqlite.addProduct(name, stock, price)) {
-                String timestamp = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm:ss a").format(new java.util.Date());
-                sqlite.addLogs("Add Product", currentUser.getUsername(), "Added " + name + " with stock " + stock + " and price " + price, timestamp);
+                Timestamp now = new Timestamp(System.currentTimeMillis());
+                sqlite.addLogs("Add Product", currentUser.getUsername(), "Added " + name + " with stock " + stock + " and price " + price, now);
                 JOptionPane.showMessageDialog(this, "Product added successfully.");
                 init();
             } else {
@@ -329,8 +330,8 @@ public class MgmtProduct extends javax.swing.JPanel {
                     }
                     
                     if (sqlite.editProduct(originalName, newName, newStock, newPrice)) {
-                        String timestamp = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm:ss a").format(new java.util.Date());
-                        sqlite.addLogs("Edit Product", currentUser.getUsername(), "Edited " + originalName + " to " + newName + ", stock: " + newStock + ", price: " + newPrice, timestamp);
+                        Timestamp now = new Timestamp(System.currentTimeMillis());
+                        sqlite.addLogs("Edit Product", currentUser.getUsername(), "Edited " + originalName + " to " + newName + ", stock: " + newStock + ", price: " + newPrice, now);
                         JOptionPane.showMessageDialog(this, "Product updated successfully.");
                         init(); // Refresh product list
                     } else {
@@ -370,8 +371,8 @@ public class MgmtProduct extends javax.swing.JPanel {
                 }
                 
                 if (sqlite.deleteProduct(name)) {
-                    String timestamp = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm:ss a").format(new java.util.Date());
-                    sqlite.addLogs("Delete Product", currentUser.getUsername(), "Deleted product: " + name, timestamp);
+                    Timestamp now = new Timestamp(System.currentTimeMillis());
+                    sqlite.addLogs("Delete Product", currentUser.getUsername(), "Deleted product: " + name, now);
                     JOptionPane.showMessageDialog(this, "Product deleted successfully.");
                     init(); // Refresh product list
                 } else {

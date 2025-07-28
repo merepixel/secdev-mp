@@ -22,25 +22,20 @@ public class History {
     private int stock;
     private Timestamp timestamp;
 
-    private SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-    
-    public History(String username, String name, int stock){
+    //private SimpleDateFormat dateformat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a");
+
+    public History(String username, String name, int stock, Timestamp timestamp){
         this.username = username;
         this.name = name;
         this.stock = stock;
-        this.timestamp = new Timestamp(new Date().getTime());
+        this.timestamp = timestamp;
     }
     
-    public History(int id, String username, String name, int stock, String timestamp){
+    public History(int id, String username, String name, int stock, Timestamp timestamp){
         this.id = id;
         this.username = username;
         this.name = name;
         this.stock = stock;
-        try {
-            this.timestamp = new Timestamp(dateformat.parse(timestamp).getTime());
-        } catch (ParseException ex) {
-            ex.printStackTrace();
-        }
     }
     
     public int getId() {

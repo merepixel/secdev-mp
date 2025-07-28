@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.Timestamp;
 
 import javax.swing.JOptionPane;
 
@@ -24,12 +25,19 @@ public class SQLite {
     private Connection conn;
     String driverURL;
     public MemoryTimeout timeoutTracker = MemoryTimeout.getInstance();
+
     
     public SQLite() {
         // Resolve relative path to project root where database.db is located
         File dbFile = new File(System.getProperty("user.dir"), "database.db"); 
         driverURL = "jdbc:sqlite:" + dbFile.getAbsolutePath();
-            }
+
+        createHistoryTable();
+        createLogsTable();
+        createProductTable();
+        createUserTable();
+        
+    }
 
     public void connect() {
         try {
@@ -68,7 +76,8 @@ public class SQLite {
             + " username TEXT NOT NULL,\n"
             + " name TEXT NOT NULL,\n"
             + " stock INTEGER DEFAULT 0,\n"
-            + " timestamp TEXT NOT NULL\n"
+            + " price REAL DEFAULT 0.00,\n"
+            + " timestamp DATETIME DEFAULT CURRENT_TIMESTAMP\n"
             + ");";
 
         try (Connection conn = DriverManager.getConnection(driverURL);
@@ -81,13 +90,15 @@ public class SQLite {
     }
     
     public void createLogsTable() {
-        String sql = "CREATE TABLE IF NOT EXISTS logs (\n"
-            + " id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-            + " event TEXT NOT NULL,\n"
-            + " username TEXT NOT NULL,\n"
-            + " desc TEXT NOT NULL,\n"
-            + " timestamp TEXT NOT NULL\n"
-            + ");";
+        String sql = """
+            CREATE TABLE IF NOT EXISTS logs (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            event      TEXT    NOT NULL,
+            username   TEXT    NOT NULL,
+            log_desc   TEXT    NOT NULL,
+            timestamp  DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+            """;
 
         try (Connection conn = DriverManager.getConnection(driverURL);
             Statement stmt = conn.createStatement()) {
@@ -181,19 +192,26 @@ public class SQLite {
         }
     }
     
-    public void addHistory(String username, String name, int stock, String timestamp) {
-        String sql = "INSERT INTO history(username,name,stock,timestamp) VALUES('" + username + "','" + name + "','" + stock + "','" + timestamp + "')";
-        
+    public void addHistory(String username, String name, int stock, double price, Timestamp timestamp) {
+        String sql = "INSERT INTO history(username, name, stock, price, timestamp) VALUES(?, ?, ?, ?, ?)";
+
         try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement()){
-            stmt.execute(sql);
-        } catch (Exception ex) {
-            System.out.print(ex);
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, username);
+            pstmt.setString(2, name);
+            pstmt.setInt(3, stock);
+            pstmt.setDouble(4, price);
+            pstmt.setTimestamp(5, timestamp);
+
+            pstmt.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
     
-    public void addLogs(String event, String username, String desc, String timestamp) {
-        String sql = "INSERT INTO logs(event, username, desc, timestamp) VALUES (?, ?, ?, ?)";
+    public void addLogs(String event, String username, String desc, Timestamp now) {
+        String sql = "INSERT INTO logs(event, username, log_desc, timestamp) VALUES (?, ?, ?, ?)";
         
         try (Connection conn = DriverManager.getConnection(driverURL);
         java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -201,8 +219,7 @@ public class SQLite {
             pstmt.setString(1, event);
             pstmt.setString(2, username);
             pstmt.setString(3, desc);
-            pstmt.setString(4, timestamp);
-            
+            pstmt.setTimestamp(4, now);
             pstmt.executeUpdate();
         } catch (Exception ex) {
             ex.printStackTrace(); // show full error, not just print
@@ -282,29 +299,45 @@ public class SQLite {
 //    }
     
     
-    public ArrayList<History> getHistory(){
-        String sql = "SELECT id, username, name, stock, timestamp FROM history";
-        ArrayList<History> histories = new ArrayList<History>();
-        
-        try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql)){
-            
-            while (rs.next()) {
-                histories.add(new History(rs.getInt("id"),
-                                   rs.getString("username"),
-                                   rs.getString("name"),
-                                   rs.getInt("stock"),
-                                   rs.getString("timestamp")));
+    public ArrayList<History> getHistory(User currentUser){
+        ArrayList<History> histories = new ArrayList<>();
+        String sql;
+
+        try (Connection conn = DriverManager.getConnection(driverURL)) {
+            PreparedStatement stmt;
+
+            if (currentUser.getRole() == 4) {
+            // Manager: can view all history
+                sql = "SELECT id, username, name, stock, timestamp FROM history";
+                stmt = conn.prepareStatement(sql);
+            } else {
+                // Regular User or Staff: only their own history
+                sql = "SELECT id, username, name, stock, timestamp FROM history WHERE username = ?";
+                stmt = conn.prepareStatement(sql);
+                stmt.setString(1, currentUser.getUsername());
             }
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                histories.add(new History(
+                    rs.getInt("id"),
+                    rs.getString("username"),
+                    rs.getString("name"),
+                    rs.getInt("stock"),
+                    rs.getTimestamp("timestamp")
+                ));
+            }
+
         } catch (Exception ex) {
             System.out.print(ex);
         }
+
         return histories;
     }
     
     public ArrayList<Logs> getLogs(){
-        String sql = "SELECT id, event, username, desc, timestamp FROM logs";
+        String sql = "SELECT id, event, username, log_desc, timestamp FROM logs";
         ArrayList<Logs> logs = new ArrayList<Logs>();
         
         try (Connection conn = DriverManager.getConnection(driverURL);
@@ -315,8 +348,8 @@ public class SQLite {
                 logs.add(new Logs(rs.getInt("id"),
                                    rs.getString("event"),
                                    rs.getString("username"),
-                                   rs.getString("desc"),
-                                   rs.getString("timestamp")));
+                                   rs.getString("log_desc"),
+                                   rs.getTimestamp("timestamp")));
             }
         } catch (Exception ex) {
             ex.printStackTrace();

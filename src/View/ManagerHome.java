@@ -34,6 +34,9 @@ public class ManagerHome extends javax.swing.JPanel {
     
     public void init(SQLite sqlite, User currentUser){
         mgmtHistory = new MgmtHistory(sqlite);
+        mgmtHistory.setCurrentUser(currentUser);
+        mgmtHistory.init();        
+        
         mgmtLogs = new MgmtLogs(sqlite);
 
         mgmtProduct = new MgmtProduct(sqlite);

@@ -8,6 +8,8 @@ package View;
 import Controller.SQLite;
 import Model.History;
 import Model.Product;
+import Model.User;
+
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -18,6 +20,12 @@ import javax.swing.table.DefaultTableModel;
  * @author beepxD
  */
 public class MgmtHistory extends javax.swing.JPanel {
+
+    private User currentUser;
+
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+    }
 
     public SQLite sqlite;
     public DefaultTableModel tableModel;
@@ -46,19 +54,37 @@ public class MgmtHistory extends javax.swing.JPanel {
         }
         
 //      LOAD CONTENTS
-        ArrayList<History> history = sqlite.getHistory();
-        for(int nCtr = 0; nCtr < history.size(); nCtr++){
-            Product product = sqlite.getProduct(history.get(nCtr).getName());
+        
+    ArrayList<History> historyList = sqlite.getHistory(currentUser);
+
+    for (History h : historyList) {
+        Product product = sqlite.getProduct(h.getName());
+
+        if (product != null) {
+            double price = product.getPrice();
             tableModel.addRow(new Object[]{
-                history.get(nCtr).getUsername(), 
-                history.get(nCtr).getName(), 
-                history.get(nCtr).getStock(), 
-                product.getPrice(), 
-                product.getPrice() * history.get(nCtr).getStock(), 
-                history.get(nCtr).getTimestamp()
+                h.getUsername(),
+                h.getName(),
+                h.getStock(),
+                price,
+                price * h.getStock(),
+                h.getTimestamp()
+            });
+        } else {
+            // Handle missing product safely
+            System.err.println("⚠ Product not found in database: " + h.getName());
+            tableModel.addRow(new Object[]{
+                h.getUsername(),
+                h.getName(),
+                h.getStock(),
+                "N/A",
+                "N/A",
+                h.getTimestamp()
             });
         }
-    }
+    } 
+
+}
     
     public void designer(JTextField component, String text){
         component.setSize(70, 600);
@@ -169,27 +195,43 @@ public class MgmtHistory extends javax.swing.JPanel {
         int result = JOptionPane.showConfirmDialog(null, message, "SEARCH HISTORY", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
         if (result == JOptionPane.OK_OPTION) {
+
+            String searchText = searchFld.getText().trim();
+
+            if (searchText.isEmpty() || searchText.length() > 100) {
+                JOptionPane.showMessageDialog(null, "Please enter a valid search keyword (max 100 characters).");
+                return;
+            }
+
 //          CLEAR TABLE
             for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
                 tableModel.removeRow(0);
             }
 
 //          LOAD CONTENTS
-            ArrayList<History> history = sqlite.getHistory();
-            for(int nCtr = 0; nCtr < history.size(); nCtr++){
-                if(searchFld.getText().contains(history.get(nCtr).getUsername()) || 
-                   history.get(nCtr).getUsername().contains(searchFld.getText()) || 
-                   searchFld.getText().contains(history.get(nCtr).getName()) || 
-                   history.get(nCtr).getName().contains(searchFld.getText())){
-                
-                    Product product = sqlite.getProduct(history.get(nCtr).getName());
+            ArrayList<History> history = sqlite.getHistory(currentUser);
+            for (History h : history) {
+                Product product = sqlite.getProduct(h.getName());
+
+                if (product != null) {
                     tableModel.addRow(new Object[]{
-                        history.get(nCtr).getUsername(), 
-                        history.get(nCtr).getName(), 
-                        history.get(nCtr).getStock(), 
-                        product.getPrice(), 
-                        product.getPrice() * history.get(nCtr).getStock(), 
-                        history.get(nCtr).getTimestamp()
+                        h.getUsername(),
+                        h.getName(),
+                        h.getStock(),
+                        product.getPrice(),
+                        product.getPrice() * h.getStock(),
+                        h.getTimestamp()
+                    });
+                } else {
+                    // Gracefully handle orphaned history entries
+                    System.err.println("⚠ Product not found: " + h.getName());
+                    tableModel.addRow(new Object[]{
+                        h.getUsername(),
+                        h.getName(),
+                        h.getStock(),
+                        "N/A",
+                        "N/A",
+                        h.getTimestamp()
                     });
                 }
             }
