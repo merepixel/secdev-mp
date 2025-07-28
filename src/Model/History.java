@@ -36,6 +36,7 @@ public class History {
         this.username = username;
         this.name = name;
         this.stock = stock;
+        this.timestamp = timestamp;
     }
     
     public int getId() {

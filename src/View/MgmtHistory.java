@@ -48,6 +48,11 @@ public class MgmtHistory extends javax.swing.JPanel {
     }
 
     public void init(){
+        if (currentUser == null) {
+            JOptionPane.showMessageDialog(this, "No user selected.");
+            return;
+        }
+
 //      CLEAR TABLE
         for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
             tableModel.removeRow(0);
@@ -185,7 +190,7 @@ public class MgmtHistory extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void searchBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtnActionPerformed
-        JTextField searchFld = new JTextField("0");
+        JTextField searchFld = new JTextField();
         designer(searchFld, "SEARCH USERNAME OR PRODUCT");
 
         Object[] message = {
@@ -195,6 +200,11 @@ public class MgmtHistory extends javax.swing.JPanel {
         int result = JOptionPane.showConfirmDialog(null, message, "SEARCH HISTORY", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
         if (result == JOptionPane.OK_OPTION) {
+
+            if (currentUser == null) {
+                JOptionPane.showMessageDialog(this, "No user selected.");
+                return;
+            }
 
             String searchText = searchFld.getText().trim();
 
