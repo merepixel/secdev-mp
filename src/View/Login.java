@@ -107,24 +107,38 @@ public class Login extends javax.swing.JPanel {
         SQLite db = new SQLite();
 
         // solution: validate login (this function compares hashed passwords)
-        User user = db.validateLogin(username, password);
 
-        MemoryTimeout timeoutTracker = MemoryTimeout.getInstance();
+        User user = db.getUserByUsername(username); // fetch even if password might be wrong
 
         if (user == null) {
             JOptionPane.showMessageDialog(this, "Incorrect username or password.");
-            timeoutTracker.incrementFailedAttempts(username);
-            
-            if (timeoutTracker.isLocked(username)) {
-                JOptionPane.showMessageDialog(this, 
-                    "Account locked due to too many failed attempts. Please try again later.");
+            return;
+        }
+
+        // Check if account is disabled
+        if (user.isDisabled()) {
+            JOptionPane.showMessageDialog(this, 
+                "Your account has been disabled due to multiple failed login attempts.\nPlease contact the administrator.");
+            return;
+        }
+
+        User validatedUser = db.validateLogin(username, password);
+
+        if (validatedUser == null) {
+            db.incrementFailedAttempts(username);
+            int failed = user.getFailedAttempts() + 1;
+
+            if (failed >= 3) {
+                db.disableUser(username);
+                JOptionPane.showMessageDialog(this, "Account disabled after 3 failed login attempts.");
+            } else {
+                JOptionPane.showMessageDialog(this, "Incorrect password. Attempt " + failed + " of 3.");
             }
             return;
         }
 
         // Successful login
-        timeoutTracker.resetFailedAttempts(username);
-
+        db.resetFailedAttempts(username);
         frame.setCurrentUser(user);
 
         // solution: rolebased view

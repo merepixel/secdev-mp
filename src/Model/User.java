@@ -7,6 +7,17 @@ public class User {
     private int role = 2;
     private int locked = 0;
 
+    private int failedAttempts;
+    private boolean isDisabled;
+
+    public int getFailedAttempts() { return failedAttempts; }
+    public void setFailedAttempts(int attempts) { this.failedAttempts = attempts; }
+
+    public boolean isDisabled() { return isDisabled; }
+    public void setDisabled(boolean disabled) { this.isDisabled = disabled; }
+
+    public User() {}
+
     public User(String username, String password){
         this.username = username;
         this.password = password;

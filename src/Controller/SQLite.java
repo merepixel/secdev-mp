@@ -26,11 +26,67 @@ public class SQLite {
     String driverURL;
     public MemoryTimeout timeoutTracker = MemoryTimeout.getInstance();
 
+    public void incrementFailedAttempts(String username) {
+        try (PreparedStatement stmt = conn.prepareStatement("UPDATE users SET failed_attempts = failed_attempts + 1 WHERE username = ?")) {
+            stmt.setString(1, username);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void disableUser(String username) {
+        try (PreparedStatement stmt = conn.prepareStatement("UPDATE users SET is_disabled = 1 WHERE username = ?")) {
+            stmt.setString(1, username);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void resetFailedAttempts(String username) {
+        try (PreparedStatement stmt = conn.prepareStatement("UPDATE users SET failed_attempts = 0 WHERE username = ?")) {
+            stmt.setString(1, username);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public User getUserByUsername(String username) {
+        User user = null;
+
+        try {
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                user = new User();
+                user.setUsername(rs.getString("username"));
+                user.setPassword(rs.getString("password"));
+                user.setRole(rs.getInt("role"));
+                user.setFailedAttempts(rs.getInt("failed_attempts"));
+                user.setDisabled(rs.getInt("is_disabled") == 1);
+            }
+
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return user;
+    }
+
     
     public SQLite() {
         // Resolve relative path to project root where database.db is located
         File dbFile = new File(System.getProperty("user.dir"), "database.db"); 
         driverURL = "jdbc:sqlite:" + dbFile.getAbsolutePath();
+
+        connect();
 
         createHistoryTable();
         createLogsTable();
