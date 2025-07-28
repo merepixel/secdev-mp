@@ -47,7 +47,17 @@ public class MgmtHistory extends javax.swing.JPanel {
 //        reportBtn.setVisible(false);
     }
 
+    private boolean isAuthorized() {
+        return currentUser != null && currentUser.getRole() == 4;
+    }
+
     public void init(){
+
+        if (!isAuthorized()) {
+            JOptionPane.showMessageDialog(this, "Unauthorized access.");
+            return;
+        }
+
         if (currentUser == null) {
             JOptionPane.showMessageDialog(this, "No user selected.");
             return;

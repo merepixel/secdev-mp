@@ -63,7 +63,17 @@ public class MgmtProduct extends javax.swing.JPanel {
 //        deleteBtn.setVisible(false);
     }
 
+    private boolean isAuthorized() {
+        return currentUser != null && (currentUser.getRole() == 3 || currentUser.getRole() == 4);
+    }
+
     public void init(){
+
+        if (!isAuthorized()) {
+            JOptionPane.showMessageDialog(this, "Unauthorized access.");
+            return;
+        }
+
         //      CLEAR TABLE
         for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
             tableModel.removeRow(0);
