@@ -33,27 +33,18 @@ public class StaffHome extends javax.swing.JPanel {
         initComponents();
     }
     
-    public void init(SQLite sqlite, User currentUser){
-        mgmtHistory = new MgmtHistory(sqlite);
-        mgmtLogs = new MgmtLogs(sqlite);
-        
+    public void init(SQLite sqlite, User currentUser){   
         mgmtProduct = new MgmtProduct(sqlite);
         mgmtProduct.setCurrentUser(currentUser);
-
-        mgmtUser = new MgmtUser(sqlite);
     
         Content.setLayout(contentView);
         Content.add(new Home("WELCOME STAFF!", new java.awt.Color(0,204,102)), "home");
-        Content.add(mgmtUser, "mgmtUser");
-        Content.add(mgmtHistory, "mgmtHistory");
         Content.add(mgmtProduct, "mgmtProduct");
-        Content.add(mgmtLogs, "mgmtLogs");
-        
+
 //        UNCOMMENT TO DISABLE BUTTONS
-//        historyBtn.setVisible(false);
-//        usersBtn.setVisible(false);
-//        productsBtn.setVisible(false);
-//        logsBtn.setVisible(false);
+        historyBtn.setVisible(false);
+        usersBtn.setVisible(false);
+        logsBtn.setVisible(false);
     }
     
     public void showPnl(String panelName){
@@ -82,7 +73,7 @@ public class StaffHome extends javax.swing.JPanel {
         usersBtn.setText("USERS");
         usersBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                usersBtnActionPerformed(evt);
+                //usersBtnActionPerformed(evt);
             }
         });
 
@@ -113,7 +104,7 @@ public class StaffHome extends javax.swing.JPanel {
         historyBtn.setText("HISTORY");
         historyBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                historyBtnActionPerformed(evt);
+                //historyBtnActionPerformed(evt);
             }
         });
 
@@ -122,7 +113,7 @@ public class StaffHome extends javax.swing.JPanel {
         logsBtn.setText("LOGS");
         logsBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                logsBtnActionPerformed(evt);
+                //logsBtnActionPerformed(evt);
             }
         });
 
@@ -159,15 +150,6 @@ public class StaffHome extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void usersBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usersBtnActionPerformed
-        mgmtUser.init();
-        usersBtn.setForeground(Color.red);
-        productsBtn.setForeground(Color.black);
-        historyBtn.setForeground(Color.black);
-        logsBtn.setForeground(Color.black);
-        contentView.show(Content, "mgmtUser");
-    }//GEN-LAST:event_usersBtnActionPerformed
-
     private void productsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productsBtnActionPerformed
         mgmtProduct.init();
         usersBtn.setForeground(Color.black);
@@ -176,25 +158,6 @@ public class StaffHome extends javax.swing.JPanel {
         logsBtn.setForeground(Color.black);
         contentView.show(Content, "mgmtProduct");
     }//GEN-LAST:event_productsBtnActionPerformed
-
-    private void historyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_historyBtnActionPerformed
-        mgmtHistory.init();
-        usersBtn.setForeground(Color.black);
-        productsBtn.setForeground(Color.black);
-        historyBtn.setForeground(Color.red);
-        logsBtn.setForeground(Color.black);
-        contentView.show(Content, "mgmtHistory");
-    }//GEN-LAST:event_historyBtnActionPerformed
-
-    private void logsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logsBtnActionPerformed
-        mgmtLogs.init();
-        usersBtn.setForeground(Color.black);
-        productsBtn.setForeground(Color.black);
-        historyBtn.setForeground(Color.black);
-        logsBtn.setForeground(Color.red);
-        contentView.show(Content, "mgmtLogs");
-    }//GEN-LAST:event_logsBtnActionPerformed
-    
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

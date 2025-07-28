@@ -7,6 +7,7 @@ import Model.User;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -192,17 +193,23 @@ public class SQLite {
     }
     
     public void addLogs(String event, String username, String desc, String timestamp) {
-        String sql = "INSERT INTO logs(event,username,desc,timestamp) VALUES('" + event + "','" + username + "','" + desc + "','" + timestamp + "')";
+        String sql = "INSERT INTO logs(event, username, desc, timestamp) VALUES (?, ?, ?, ?)";
         
         try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement()){
-            stmt.execute(sql);
+        java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        
+            pstmt.setString(1, event);
+            pstmt.setString(2, username);
+            pstmt.setString(3, desc);
+            pstmt.setString(4, timestamp);
+            
+            pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.print(ex);
-        }
+            ex.printStackTrace(); // show full error, not just print
+        }   
     }
     
-    public void addProduct(String name, int stock, double price) {
+    public boolean addProduct(String name, int stock, double price) {
     String sql = "INSERT INTO product(name, stock, price) VALUES (?, ?, ?)";
 
         try (Connection conn = DriverManager.getConnection(driverURL);
@@ -212,13 +219,15 @@ public class SQLite {
             pstmt.setInt(2, stock);
             pstmt.setDouble(3, price);
             pstmt.executeUpdate();
+            return true;
 
         } catch (Exception ex) {
-            System.out.print(ex);
+            System.err.println("Failed to add product: " + ex.getMessage());
+            return false;
         }
     }
 
-    public void editProduct(String originalName, String newName, int stock, double price) {
+    public boolean editProduct(String originalName, String newName, int stock, double price) {
         String sql = "UPDATE product SET name = ?, stock = ?, price = ? WHERE name = ?";
 
         try (Connection conn = DriverManager.getConnection(driverURL);
@@ -228,26 +237,28 @@ public class SQLite {
             pstmt.setInt(2, stock);
             pstmt.setDouble(3, price);
             pstmt.setString(4, originalName);
-            pstmt.executeUpdate();
-
-            System.out.println("Product " + originalName + " updated to " + newName);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+            
         } catch (Exception ex) {
-            System.out.print(ex);
+            System.err.println("Failed to edit product: " + ex.getMessage());
+            return false;
         }
     }
 
-    public void deleteProduct(String name) {
+    public boolean deleteProduct(String name) {
         String sql = "DELETE FROM product WHERE name = ?";
 
         try (Connection conn = DriverManager.getConnection(driverURL);
             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, name);
-            pstmt.executeUpdate();
-
-            System.out.println("Product " + name + " deleted.");
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
         } catch (Exception ex) {
-            System.out.print(ex);
+            System.err.println("Failed to delete product: " + ex.getMessage());
+            return false;
         }
     }
 
@@ -540,6 +551,19 @@ public class SQLite {
         }
 
         return null; // login failed
+    }
+
+    public boolean productExists(String name) {
+        String sql = "SELECT 1 FROM product WHERE name = ? LIMIT 1";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, name);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next(); // true if product exists
+        } catch (Exception ex) {
+            System.out.println("Error checking product existence: " + ex);
+            return false;
+        }
     }
     
 }

@@ -24,6 +24,7 @@ public class MgmtProduct extends javax.swing.JPanel {
     public SQLite sqlite;
     public DefaultTableModel tableModel;
     private User currentUser;
+    String timestamp = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm:ss a").format(new java.util.Date());
 
     private void enforceRoleAccess() {
         if (currentUser == null) return;
@@ -223,6 +224,7 @@ public class MgmtProduct extends javax.swing.JPanel {
             return;
         }
 
+
         JTextField nameFld = new JTextField();
         JTextField stockFld = new JTextField();
         JTextField priceFld = new JTextField();
@@ -242,14 +244,37 @@ public class MgmtProduct extends javax.swing.JPanel {
             int stock = Integer.parseInt(stockFld.getText().trim());
             double price = Double.parseDouble(priceFld.getText().trim());
 
+            try {
+                stock = Integer.parseInt(stockFld.getText().trim());
+                price = Double.parseDouble(priceFld.getText().trim());
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Stock and price must be valid numbers.");
+                return;
+            }
+
             if (name.isEmpty() || stock < 0 || price < 0.0) {
                 JOptionPane.showMessageDialog(this, "Invalid input.");
                 return;
             }
 
-            sqlite.addProduct(name, stock, price);
-            init(); // refresh table
-            JOptionPane.showMessageDialog(this, "Product added successfully.");
+            if (sqlite.productExists(name)) {
+                JOptionPane.showMessageDialog(this, "A product with this name already exists.");
+                return;
+            }
+
+            if (name.trim().isEmpty() || stock < 0 || price < 0.0) {
+                JOptionPane.showMessageDialog(this, "Invalid input. Ensure the name is not empty and stock/price are non-negative.");
+                return;
+            }
+
+            if (sqlite.addProduct(name, stock, price)) {
+                String timestamp = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm:ss a").format(new java.util.Date());
+                sqlite.addLogs("Add Product", currentUser.getUsername(), "Added " + name + " with stock " + stock + " and price " + price, timestamp);
+                JOptionPane.showMessageDialog(this, "Product added successfully.");
+                init();
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to add product. Please try again.");
+            }
 
             System.out.println(nameFld.getText());
             System.out.println(stockFld.getText());
@@ -293,9 +318,25 @@ public class MgmtProduct extends javax.swing.JPanel {
                         return;
                     }
 
-                    sqlite.editProduct(originalName, newName, newStock, newPrice);
-                    JOptionPane.showMessageDialog(this, "Product updated successfully.");
-                    init(); // Refresh product list
+                    if (!newName.equals(originalName) && sqlite.productExists(newName)) {
+                        JOptionPane.showMessageDialog(this, "That name is already in use.");
+                        return;
+                    }
+
+                    if (!sqlite.productExists(originalName)) {
+                        JOptionPane.showMessageDialog(this, "The product you are trying to edit no longer exists.");
+                        return;
+                    }
+                    
+                    if (sqlite.editProduct(originalName, newName, newStock, newPrice)) {
+                        String timestamp = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm:ss a").format(new java.util.Date());
+                        sqlite.addLogs("Edit Product", currentUser.getUsername(), "Edited " + originalName + " to " + newName + ", stock: " + newStock + ", price: " + newPrice, timestamp);
+                        JOptionPane.showMessageDialog(this, "Product updated successfully.");
+                        init(); // Refresh product list
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Failed to update product.");
+                    }
+
                 } catch (NumberFormatException e) {
                     JOptionPane.showMessageDialog(this, "Stock and Price must be valid numbers.");
                 }
@@ -322,9 +363,20 @@ public class MgmtProduct extends javax.swing.JPanel {
         );
 
             if (result == JOptionPane.YES_OPTION) {
-                sqlite.deleteProduct(name);
-                JOptionPane.showMessageDialog(this, "Product \"" + name + "\" deleted successfully.");
-                init(); // Refresh the table
+
+                if (!sqlite.productExists(name)) {
+                    JOptionPane.showMessageDialog(this, "The product you are trying to delete no longer exists.");
+                    return;
+                }
+                
+                if (sqlite.deleteProduct(name)) {
+                    String timestamp = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm:ss a").format(new java.util.Date());
+                    sqlite.addLogs("Delete Product", currentUser.getUsername(), "Deleted product: " + name, timestamp);
+                    JOptionPane.showMessageDialog(this, "Product deleted successfully.");
+                    init(); // Refresh product list
+                } else {
+                    JOptionPane.showMessageDialog(this, "Failed to delete product.");
+                }
             }
         } else {
             JOptionPane.showMessageDialog(this, "Please select a product to delete.");
