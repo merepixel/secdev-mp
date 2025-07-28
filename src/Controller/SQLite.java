@@ -203,15 +203,54 @@ public class SQLite {
     }
     
     public void addProduct(String name, int stock, double price) {
-        String sql = "INSERT INTO product(name,stock,price) VALUES('" + name + "','" + stock + "','" + price + "')";
-        
+    String sql = "INSERT INTO product(name, stock, price) VALUES (?, ?, ?)";
+
         try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement()){
-            stmt.execute(sql);
+            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, name);
+            pstmt.setInt(2, stock);
+            pstmt.setDouble(3, price);
+            pstmt.executeUpdate();
+
         } catch (Exception ex) {
             System.out.print(ex);
         }
     }
+
+    public void editProduct(String originalName, String newName, int stock, double price) {
+        String sql = "UPDATE product SET name = ?, stock = ?, price = ? WHERE name = ?";
+
+        try (Connection conn = DriverManager.getConnection(driverURL);
+            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, newName);
+            pstmt.setInt(2, stock);
+            pstmt.setDouble(3, price);
+            pstmt.setString(4, originalName);
+            pstmt.executeUpdate();
+
+            System.out.println("Product " + originalName + " updated to " + newName);
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+    }
+
+    public void deleteProduct(String name) {
+        String sql = "DELETE FROM product WHERE name = ?";
+
+        try (Connection conn = DriverManager.getConnection(driverURL);
+            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, name);
+            pstmt.executeUpdate();
+
+            System.out.println("Product " + name + " deleted.");
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+    }
+
     
 //    public void addUser(String username, String password) {
 //        String sql = "INSERT INTO users(username,password) VALUES('" + username + "','" + password + "')";

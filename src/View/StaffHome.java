@@ -24,6 +24,7 @@ public class StaffHome extends javax.swing.JPanel {
     public MgmtHistory mgmtHistory;
     public MgmtLogs mgmtLogs;
     public MgmtProduct mgmtProduct;
+    
     public MgmtUser mgmtUser;
     
     private CardLayout contentView = new CardLayout();
@@ -32,10 +33,13 @@ public class StaffHome extends javax.swing.JPanel {
         initComponents();
     }
     
-    public void init(SQLite sqlite){
+    public void init(SQLite sqlite, User currentUser){
         mgmtHistory = new MgmtHistory(sqlite);
         mgmtLogs = new MgmtLogs(sqlite);
+        
         mgmtProduct = new MgmtProduct(sqlite);
+        mgmtProduct.setCurrentUser(currentUser);
+
         mgmtUser = new MgmtUser(sqlite);
     
         Content.setLayout(contentView);

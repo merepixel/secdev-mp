@@ -259,10 +259,10 @@ public class Frame extends javax.swing.JFrame {
         loginPnl.frame = this;
         registerPnl.frame = this;
         
-        adminHomePnl.init(main.sqlite);
-        clientHomePnl.init(main.sqlite);
-        managerHomePnl.init(main.sqlite);
-        staffHomePnl.init(main.sqlite);
+        adminHomePnl.init(main.sqlite, currentUser);
+        clientHomePnl.init(main.sqlite, currentUser);
+        managerHomePnl.init(main.sqlite, currentUser);
+        staffHomePnl.init(main.sqlite, currentUser);
         
         Container.setLayout(frameView);
         Container.add(loginPnl, "loginPnl");
@@ -298,25 +298,29 @@ public class Frame extends javax.swing.JFrame {
         frameView.show(Container, "registerPnl");
     }
     
-        public void adminNav() {
+        public void adminNav(User user) {
+        adminHomePnl.init(main.sqlite, user);
         this.mainNav();
         adminHomePnl.showPnl("home");
         contentView.show(Content, "adminHomePnl");
     }
 
-    public void managerNav() {
+    public void managerNav(User user) {
+        managerHomePnl.init(main.sqlite, user);
         this.mainNav();
         managerHomePnl.showPnl("home");
         contentView.show(Content, "managerHomePnl");
     }
 
-    public void staffNav() {
+    public void staffNav(User user) {
+        staffHomePnl.init(main.sqlite, user);
         this.mainNav();
         staffHomePnl.showPnl("home");
         contentView.show(Content, "staffHomePnl");
     }
 
-    public void clientNav() {
+    public void clientNav(User user) {
+        clientHomePnl.init(main.sqlite, user);
         this.mainNav();
         clientHomePnl.showPnl("home");
         contentView.show(Content, "clientHomePnl");

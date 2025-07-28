@@ -130,16 +130,16 @@ public class Login extends javax.swing.JPanel {
         // solution: rolebased view
         switch (user.getRole()) {
             case 5: // Admin
-                frame.adminNav();
+                frame.adminNav(user);
                 break;
             case 4: // Manager
-                frame.managerNav();
+                frame.managerNav(user);
                 break;
             case 3: // Staff
-                frame.staffNav();
+                frame.staffNav(user);
                 break;
             case 2: // Client
-                frame.clientNav();
+                frame.clientNav(user);
                 break;
             default:
                 JOptionPane.showMessageDialog(this, "Your account has no access privileges.");

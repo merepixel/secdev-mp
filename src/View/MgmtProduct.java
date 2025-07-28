@@ -12,6 +12,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+import Model.User;
+
 
 /**
  *
@@ -21,6 +23,30 @@ public class MgmtProduct extends javax.swing.JPanel {
 
     public SQLite sqlite;
     public DefaultTableModel tableModel;
+    private User currentUser;
+
+    private void enforceRoleAccess() {
+        if (currentUser == null) return;
+
+        int role = currentUser.getRole();
+
+        if (role == 3 || role == 4) {
+            // Manager and Staff: can Add, Edit, Delete but not Purchase
+            purchaseBtn.setVisible(false);
+        } else {
+            // All others: no access to any management buttons
+            addBtn.setVisible(false);
+            editBtn.setVisible(false);
+            deleteBtn.setVisible(false);
+            purchaseBtn.setVisible(false);
+        }
+    
+    }
+
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        enforceRoleAccess();
+    }
     
     public MgmtProduct(SQLite sqlite) {
         initComponents();
@@ -191,6 +217,12 @@ public class MgmtProduct extends javax.swing.JPanel {
     }//GEN-LAST:event_purchaseBtnActionPerformed
 
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
+
+        if (currentUser.getRole() != 3 && currentUser.getRole() != 4) {
+            JOptionPane.showMessageDialog(this, "Access denied.");
+            return;
+        }
+
         JTextField nameFld = new JTextField();
         JTextField stockFld = new JTextField();
         JTextField priceFld = new JTextField();
@@ -206,6 +238,19 @@ public class MgmtProduct extends javax.swing.JPanel {
         int result = JOptionPane.showConfirmDialog(null, message, "ADD PRODUCT", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
         if (result == JOptionPane.OK_OPTION) {
+            String name = nameFld.getText().trim();
+            int stock = Integer.parseInt(stockFld.getText().trim());
+            double price = Double.parseDouble(priceFld.getText().trim());
+
+            if (name.isEmpty() || stock < 0 || price < 0.0) {
+                JOptionPane.showMessageDialog(this, "Invalid input.");
+                return;
+            }
+
+            sqlite.addProduct(name, stock, price);
+            init(); // refresh table
+            JOptionPane.showMessageDialog(this, "Product added successfully.");
+
             System.out.println(nameFld.getText());
             System.out.println(stockFld.getText());
             System.out.println(priceFld.getText());
@@ -213,10 +258,18 @@ public class MgmtProduct extends javax.swing.JPanel {
     }//GEN-LAST:event_addBtnActionPerformed
 
     private void editBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editBtnActionPerformed
+
+        if (currentUser.getRole() != 3 && currentUser.getRole() != 4) {
+            JOptionPane.showMessageDialog(this, "Access denied.");
+            return;
+        }
+
         if(table.getSelectedRow() >= 0){
-            JTextField nameFld = new JTextField(tableModel.getValueAt(table.getSelectedRow(), 0) + "");
-            JTextField stockFld = new JTextField(tableModel.getValueAt(table.getSelectedRow(), 1) + "");
-            JTextField priceFld = new JTextField(tableModel.getValueAt(table.getSelectedRow(), 2) + "");
+            String originalName = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
+
+            JTextField nameFld = new JTextField(originalName);
+            JTextField stockFld = new JTextField(tableModel.getValueAt(table.getSelectedRow(), 1).toString());
+            JTextField priceFld = new JTextField(tableModel.getValueAt(table.getSelectedRow(), 2).toString());
 
             designer(nameFld, "PRODUCT NAME");
             designer(stockFld, "PRODUCT STOCK");
@@ -229,20 +282,52 @@ public class MgmtProduct extends javax.swing.JPanel {
             int result = JOptionPane.showConfirmDialog(null, message, "EDIT PRODUCT", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
             if (result == JOptionPane.OK_OPTION) {
-                System.out.println(nameFld.getText());
-                System.out.println(stockFld.getText());
-                System.out.println(priceFld.getText());
+                try {
+                    String newName = nameFld.getText().trim();
+                    int newStock = Integer.parseInt(stockFld.getText().trim());
+                    double newPrice = Double.parseDouble(priceFld.getText().trim());
+
+                    // Simple validation
+                    if (newName.isEmpty() || newStock < 0 || newPrice < 0.0) {
+                        JOptionPane.showMessageDialog(this, "Invalid input. Please check the fields.");
+                        return;
+                    }
+
+                    sqlite.editProduct(originalName, newName, newStock, newPrice);
+                    JOptionPane.showMessageDialog(this, "Product updated successfully.");
+                    init(); // Refresh product list
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this, "Stock and Price must be valid numbers.");
+                }
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a product to edit.");
         }
     }//GEN-LAST:event_editBtnActionPerformed
 
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
+        if (currentUser.getRole() != 3 && currentUser.getRole() != 4) {
+            JOptionPane.showMessageDialog(this, "Access denied.");
+            return;
+        }
+
         if(table.getSelectedRow() >= 0){
-            int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + tableModel.getValueAt(table.getSelectedRow(), 0) + "?", "DELETE PRODUCT", JOptionPane.YES_NO_OPTION);
-            
+            String name = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
+
+            int result = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to delete \"" + name + "\"?",
+            "DELETE PRODUCT",
+            JOptionPane.YES_NO_OPTION
+        );
+
             if (result == JOptionPane.YES_OPTION) {
-                System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
+                sqlite.deleteProduct(name);
+                JOptionPane.showMessageDialog(this, "Product \"" + name + "\" deleted successfully.");
+                init(); // Refresh the table
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a product to delete.");
         }
     }//GEN-LAST:event_deleteBtnActionPerformed
 
