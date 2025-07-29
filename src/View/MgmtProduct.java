@@ -14,6 +14,8 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import Model.User;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 /**
@@ -257,6 +259,9 @@ public class MgmtProduct extends javax.swing.JPanel {
                     int newStock = product.getStock() - quantity;
                     db.updateProductStock(product.getId(), newStock); // You implement this
                     JOptionPane.showMessageDialog(this, "Purchase successful.");
+
+                    String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+                    sqlite.insertHistory(currentUser.getUsername(), product.getName(), quantity, timestamp);
 
                     this.init();
 

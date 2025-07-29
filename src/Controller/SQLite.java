@@ -13,6 +13,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.JOptionPane;
 
@@ -377,12 +379,16 @@ public class SQLite {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
+                String timestamp = rs.getString("timestamp");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date parsedDate = sdf.parse(timestamp);
+
                 histories.add(new History(
                     rs.getInt("id"),
                     rs.getString("username"),
                     rs.getString("name"),
                     rs.getInt("stock"),
-                    rs.getTimestamp("timestamp")
+                    new java.sql.Timestamp(parsedDate.getTime())
                 ));
             }
 
@@ -392,6 +398,20 @@ public class SQLite {
 
         return histories;
     }
+
+    public void insertHistory(String username, String productName, int quantity, String timestamp) {
+        String query = "INSERT INTO history (username, name, stock, timestamp) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, username);
+            stmt.setString(2, productName);
+            stmt.setInt(3, quantity);
+            stmt.setString(4, timestamp);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     
     public ArrayList<Logs> getLogs(){
         String sql = "SELECT id, event, username, log_desc, timestamp FROM logs";
@@ -514,11 +534,11 @@ public class SQLite {
             stmt.setInt(1, newRole);
             stmt.setString(2, username);
             return stmt.executeUpdate() > 0;
-    } catch (SQLException e) {
-        e.printStackTrace();
-        return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
-}
 
     public String validatePassword(String password, String username) {
         List<String> errors = new ArrayList<>();
