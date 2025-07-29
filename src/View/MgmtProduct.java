@@ -64,7 +64,7 @@ public class MgmtProduct extends javax.swing.JPanel {
     }
 
     private boolean isAuthorized() {
-        return currentUser != null && (currentUser.getRole() == 3 || currentUser.getRole() == 4);
+        return currentUser != null && (currentUser.getRole() == 2 || currentUser.getRole() == 3 || currentUser.getRole() == 4);
     }
 
     public void init(){
