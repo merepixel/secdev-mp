@@ -472,6 +472,19 @@ public class SQLite {
         }
     }
 
+    public boolean updateUserRole(String username, int newRole) {
+        String sql = "UPDATE users SET role = ? WHERE username = ?";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, newRole);
+            stmt.setString(2, username);
+            return stmt.executeUpdate() > 0;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
 
     public String validatePassword(String password, String username) {
         List<String> errors = new ArrayList<>();

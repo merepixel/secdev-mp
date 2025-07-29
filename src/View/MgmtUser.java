@@ -189,8 +189,16 @@ public class MgmtUser extends javax.swing.JPanel {
                 "EDIT USER ROLE", JOptionPane.QUESTION_MESSAGE, null, options, options[(int)tableModel.getValueAt(table.getSelectedRow(), 2) - 1]);
             
             if(result != null){
-                System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
-                System.out.println(result.charAt(0));
+                String username = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
+                int newRole = Character.getNumericValue(result.charAt(0));
+
+                boolean success = sqlite.updateUserRole(username, newRole);
+                if (success) {
+                    JOptionPane.showMessageDialog(null, "User role updated.");
+                    init(); // refresh table
+                } else {
+                    JOptionPane.showMessageDialog(null, "Failed to update role.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
     }//GEN-LAST:event_editRoleBtnActionPerformed
