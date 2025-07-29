@@ -25,14 +25,15 @@ public class ClientHome extends javax.swing.JPanel {
     public MgmtLogs mgmtLogs;
     public MgmtProduct mgmtProduct;
     public MgmtUser mgmtUser;
+    private User currentUser;
     
     private CardLayout contentView = new CardLayout();
     
     public ClientHome() {
         initComponents();
     }
-    
-    public void init(SQLite sqlite, User currentUser){
+    public void init(SQLite sqlite, User currentUser) {
+        this.currentUser = currentUser;
         mgmtHistory = new MgmtHistory(sqlite);
         mgmtLogs = new MgmtLogs(sqlite);
         mgmtProduct = new MgmtProduct(sqlite);
@@ -175,6 +176,7 @@ public class ClientHome extends javax.swing.JPanel {
     }//GEN-LAST:event_productsBtnActionPerformed
 
     private void historyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_historyBtnActionPerformed
+        mgmtHistory.setCurrentUser(currentUser);
         mgmtHistory.init();
         usersBtn.setForeground(Color.black);
         productsBtn.setForeground(Color.black);
