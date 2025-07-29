@@ -234,7 +234,17 @@ public class MgmtUser extends javax.swing.JPanel {
             int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to " + state + " " + tableModel.getValueAt(table.getSelectedRow(), 0) + "?", "DELETE USER", JOptionPane.YES_NO_OPTION);
             
             if (result == JOptionPane.YES_OPTION) {
-                System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
+                String username = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
+                int currentLocked = Integer.parseInt(tableModel.getValueAt(table.getSelectedRow(), 3).toString());
+                int newLocked = (currentLocked == 1) ? 0 : 1;
+
+                boolean success = sqlite.updateUserLockState(username, newLocked);
+                if (success) {
+                    JOptionPane.showMessageDialog(null, "User lock state updated.");
+                    init(); // refresh
+                } else {
+                    JOptionPane.showMessageDialog(null, "Failed to update lock state.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
     }//GEN-LAST:event_lockBtnActionPerformed
@@ -253,8 +263,27 @@ public class MgmtUser extends javax.swing.JPanel {
             int result = JOptionPane.showConfirmDialog(null, message, "CHANGE PASSWORD", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
             
             if (result == JOptionPane.OK_OPTION) {
-                System.out.println(password.getText());
-                System.out.println(confpass.getText());
+                String username = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
+                String pass = password.getText().trim();
+                String conf = confpass.getText().trim();
+
+                if (!pass.equals(conf)) {
+                    JOptionPane.showMessageDialog(null, "Passwords do not match.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (pass.length() < 8) {
+                    JOptionPane.showMessageDialog(null, "Password must be at least 8 characters.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                boolean success = sqlite.updateUserPassword(username, pass);
+                if (success) {
+                    JOptionPane.showMessageDialog(null, "Password changed successfully.");
+                    init(); // optional
+                } else {
+                    JOptionPane.showMessageDialog(null, "Failed to change password.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
     }//GEN-LAST:event_chgpassBtnActionPerformed

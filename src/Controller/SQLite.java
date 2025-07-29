@@ -485,7 +485,6 @@ public class SQLite {
     }
 }
 
-
     public String validatePassword(String password, String username) {
         List<String> errors = new ArrayList<>();
 
@@ -516,6 +515,18 @@ public class SQLite {
 
         if (errors.isEmpty()) return null;
         return String.join("\n", errors);
+    }
+
+    public boolean updateUserLockState(String username, int locked) {
+        String sql = "UPDATE users SET locked = ? WHERE username = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, locked);
+            stmt.setString(2, username);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public boolean registerUser(String username, String password, String confirmPassword) {
@@ -588,6 +599,19 @@ public class SQLite {
             System.out.print(ex);
         }
         return false;
+    }
+
+    public boolean updateUserPassword(String username, String newPlainPassword) {
+        String hashedPassword = HashPassword.hashPassword(newPlainPassword);
+        String sql = "UPDATE users SET password = ? WHERE username = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, hashedPassword);
+            stmt.setString(2, username);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
     
     public Product getProduct(String name){
