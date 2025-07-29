@@ -196,13 +196,24 @@ public class MgmtUser extends javax.swing.JPanel {
     }//GEN-LAST:event_editRoleBtnActionPerformed
 
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
-        if(table.getSelectedRow() >= 0){
-            int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + tableModel.getValueAt(table.getSelectedRow(), 0) + "?", "DELETE USER", JOptionPane.YES_NO_OPTION);
-            
-            if (result == JOptionPane.YES_OPTION) {
-                System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
-            }
+        if (table.getSelectedRow() >= 0) {
+        String selectedUsername = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
+
+        int result = JOptionPane.showConfirmDialog(
+            null,
+            "Are you sure you want to delete " + selectedUsername + "?",
+            "DELETE USER",
+            JOptionPane.YES_NO_OPTION
+        );
+
+        if (result == JOptionPane.YES_OPTION) {
+            sqlite.removeUser(selectedUsername);
+            JOptionPane.showMessageDialog(null, "User has been deleted.");
+            init(); // Refresh the user table
         }
+    } else {
+        JOptionPane.showMessageDialog(null, "Please select a user to delete.", "No Selection", JOptionPane.WARNING_MESSAGE);
+    }
     }//GEN-LAST:event_deleteBtnActionPerformed
 
     private void lockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockBtnActionPerformed
