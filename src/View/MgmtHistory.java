@@ -48,7 +48,7 @@ public class MgmtHistory extends javax.swing.JPanel {
     }
 
     private boolean isAuthorized() {
-        return currentUser != null && currentUser.getRole() == 4;
+        return currentUser != null && (currentUser.getRole() == 4 || currentUser.getRole() == 2);
     }
 
     public void init(){

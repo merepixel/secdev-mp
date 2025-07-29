@@ -433,6 +433,40 @@ public class SQLite {
         }
         return products;
     }
+
+    public Product getProductByName(String name) {
+        try (Connection conn = DriverManager.getConnection(driverURL);
+            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM product WHERE name = ?")) {
+            stmt.setString(1, name);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return new Product(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getInt("stock"),
+                    rs.getFloat("price")
+                    // etc. — match your Product constructor
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+}
+
+    public void updateProductStock(int productId, int newStock) {
+        try (Connection conn = DriverManager.getConnection(driverURL);
+            PreparedStatement stmt = conn.prepareStatement("UPDATE product SET stock = ? WHERE id = ?")) {
+            stmt.setInt(1, newStock);
+            stmt.setInt(2, productId);
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
     
     public ArrayList<User> getUsers(){
         String sql = "SELECT id, username, password, role, locked FROM users";

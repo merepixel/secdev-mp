@@ -221,18 +221,48 @@ public class MgmtProduct extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void purchaseBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_purchaseBtnActionPerformed
-        if(table.getSelectedRow() >= 0){
+        if (table.getSelectedRow() >= 0) {
+        String productName = tableModel.getValueAt(table.getSelectedRow(), 0).toString(); 
+        SQLite db = new SQLite();
+        Product product = db.getProductByName(productName);  
+
+            if (product == null) {
+                JOptionPane.showMessageDialog(this, "Product not found.");
+                return;
+            }
+
             JTextField stockFld = new JTextField("0");
             designer(stockFld, "PRODUCT STOCK");
 
             Object[] message = {
-                "How many " + tableModel.getValueAt(table.getSelectedRow(), 0) + " do you want to purchase?", stockFld
+                "How many " + productName + " do you want to purchase?", stockFld
             };
 
             int result = JOptionPane.showConfirmDialog(null, message, "PURCHASE PRODUCT", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
             if (result == JOptionPane.OK_OPTION) {
-                System.out.println(stockFld.getText());
+                try {
+                    int quantity = Integer.parseInt(stockFld.getText());
+
+                    if (quantity <= 0) {
+                        JOptionPane.showMessageDialog(this, "Quantity must be positive.");
+                        return;
+                    }
+
+                    if (quantity > product.getStock()) {
+                        JOptionPane.showMessageDialog(this, "Not enough stock available.");
+                        return;
+                    }
+
+                    int newStock = product.getStock() - quantity;
+                    db.updateProductStock(product.getId(), newStock); // You implement this
+                    JOptionPane.showMessageDialog(this, "Purchase successful.");
+
+                    this.init();
+
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this, "Please enter a valid number.");
+                }
             }
         }
     }//GEN-LAST:event_purchaseBtnActionPerformed
