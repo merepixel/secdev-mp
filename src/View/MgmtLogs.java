@@ -27,7 +27,7 @@ public class MgmtLogs extends javax.swing.JPanel {
         
 //        UNCOMMENT TO DISABLE BUTTONS
 //        clearBtn.setVisible(false);
-//        debugBtn.setVisible(false);
+        debugBtn.setVisible(false);
     }
 
     public void init(){
@@ -135,7 +135,17 @@ public class MgmtLogs extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void clearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearBtnActionPerformed
-        
+            int confirm = javax.swing.JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to clear all logs?",
+            "Confirm Clear Logs",
+            javax.swing.JOptionPane.YES_NO_OPTION
+        );
+
+        if (confirm == javax.swing.JOptionPane.YES_OPTION) {
+            sqlite.clearLogs();  // clear from DB
+            init();              // refresh the table view
+        }
     }//GEN-LAST:event_clearBtnActionPerformed
 
     private void debugBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_debugBtnActionPerformed
