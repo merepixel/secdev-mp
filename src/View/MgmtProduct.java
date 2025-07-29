@@ -35,7 +35,16 @@ public class MgmtProduct extends javax.swing.JPanel {
         if (role == 3 || role == 4) {
             // Manager and Staff: can Add, Edit, Delete but not Purchase
             purchaseBtn.setVisible(false);
-        } else {
+        } 
+
+        if (role == 2) {
+            // Manager and Staff: can Add, Edit, Delete but not Purchase
+            addBtn.setVisible(false);
+            editBtn.setVisible(false);
+            deleteBtn.setVisible(false);
+        } 
+        
+        if (role == 1 || role == 5) {
             // All others: no access to any management buttons
             addBtn.setVisible(false);
             editBtn.setVisible(false);
