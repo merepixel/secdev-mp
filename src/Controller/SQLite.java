@@ -69,6 +69,7 @@ public class SQLite {
                 user.setRole(rs.getInt("role"));
                 user.setFailedAttempts(rs.getInt("failed_attempts"));
                 user.setDisabled(rs.getInt("is_disabled") == 1);
+                user.setLocked(rs.getInt("locked"));
             }
 
             rs.close();
@@ -648,17 +649,22 @@ public class SQLite {
         if (timeoutTracker.isLocked(username)) {
             JOptionPane.showMessageDialog(null, "Account locked due to too many failed login attempts. Please try again later.");
             return null;
-        } // login failed due to rate limiting
+        }
 
         String sql = "SELECT id, username, password, role, locked FROM users WHERE username = ?";
 
         try (Connection conn = DriverManager.getConnection(driverURL);
-             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
+                int locked = rs.getInt("locked");
+                if (locked == 1) {
+                    return null;
+                }
+
                 String storedHash = rs.getString("password");
                 String hashedInput = HashPassword.hashPassword(passwordPlaintext);
 
@@ -668,10 +674,11 @@ public class SQLite {
                         rs.getString("username"),
                         storedHash,
                         rs.getInt("role"),
-                        rs.getInt("locked")
+                        locked
                     );
                 }
             }
+
         } catch (Exception ex) {
             System.out.print(ex);
         }

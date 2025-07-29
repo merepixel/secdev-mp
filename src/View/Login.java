@@ -108,23 +108,25 @@ public class Login extends javax.swing.JPanel {
 
         // solution: validate login (this function compares hashed passwords)
 
-        User user = db.getUserByUsername(username); // fetch even if password might be wrong
+        User user = db.getUserByUsername(username);
 
         if (user == null) {
             JOptionPane.showMessageDialog(this, "Incorrect username or password.");
             return;
         }
 
-        // Check if account is disabled
-        if (user.isDisabled()) {
-            JOptionPane.showMessageDialog(this, 
-                "Your account has been disabled due to multiple failed login attempts.\nPlease contact the administrator.");
+        if (user.getLocked() == 1) {
+            JOptionPane.showMessageDialog(this, "This account is currently locked. Please contact an administrator.");
             return;
         }
 
-        User validatedUser = db.validateLogin(username, password);
+        if (user.isDisabled()) {
+            JOptionPane.showMessageDialog(this, "Your account has been disabled due to multiple failed login attempts.\nPlease contact the administrator.");
+            return;
+        }
 
-        if (validatedUser == null) {
+        String hashedInput = HashPassword.hashPassword(password);
+        if (!hashedInput.equals(user.getPassword())) {
             db.incrementFailedAttempts(username);
             int failed = user.getFailedAttempts() + 1;
 
