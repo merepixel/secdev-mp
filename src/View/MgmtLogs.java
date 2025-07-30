@@ -7,7 +7,11 @@ package View;
 
 import Controller.SQLite;
 import Model.Logs;
+
+import java.sql.Timestamp;
 import java.util.ArrayList;
+
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -18,10 +22,12 @@ public class MgmtLogs extends javax.swing.JPanel {
 
     public SQLite sqlite;
     public DefaultTableModel tableModel;
-    
-    public MgmtLogs(SQLite sqlite) {
+    private Model.User currentUser; // Add this line
+
+    public MgmtLogs(SQLite sqlite, Model.User currentUser) { // Add currentUser parameter
         initComponents();
         this.sqlite = sqlite;
+        this.currentUser = currentUser; // Assign currentUser
         tableModel = (DefaultTableModel)table.getModel();
         table.getTableHeader().setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 14));
         
@@ -135,6 +141,10 @@ public class MgmtLogs extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void clearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearBtnActionPerformed
+            if (currentUser.getRole() != 5) {
+            JOptionPane.showMessageDialog(this, "Access denied. Admins only.");
+            return;
+        }
             int confirm = javax.swing.JOptionPane.showConfirmDialog(
             this,
             "Are you sure you want to clear all logs?",
@@ -144,6 +154,13 @@ public class MgmtLogs extends javax.swing.JPanel {
 
         if (confirm == javax.swing.JOptionPane.YES_OPTION) {
             sqlite.clearLogs();  // clear from DB
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            sqlite.addLogs(
+                "Clear Logs",
+                currentUser.getUsername(),
+                "Cleared all logs in the system.",
+                now
+            );
             init();              // refresh the table view
         }
     }//GEN-LAST:event_clearBtnActionPerformed
