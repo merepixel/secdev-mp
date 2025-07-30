@@ -24,10 +24,12 @@ public class MgmtUser extends javax.swing.JPanel {
 
     public SQLite sqlite;
     public DefaultTableModel tableModel;
+    public User currentUser;
     
-    public MgmtUser(SQLite sqlite) {
+    public MgmtUser(SQLite sqlite, User currentUser) {
         initComponents();
         this.sqlite = sqlite;
+        this.currentUser = currentUser;
         tableModel = (DefaultTableModel)table.getModel();
         table.getTableHeader().setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 14));
         
@@ -204,6 +206,11 @@ public class MgmtUser extends javax.swing.JPanel {
     }//GEN-LAST:event_editRoleBtnActionPerformed
 
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
+        if (currentUser.getRole() != 5) {
+            JOptionPane.showMessageDialog(this, "Access denied. Admins only.");
+            return;
+        }
+
         if (table.getSelectedRow() >= 0) {
         String selectedUsername = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
 
@@ -225,6 +232,11 @@ public class MgmtUser extends javax.swing.JPanel {
     }//GEN-LAST:event_deleteBtnActionPerformed
 
     private void lockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockBtnActionPerformed
+        if (currentUser.getRole() != 5) {
+            JOptionPane.showMessageDialog(this, "Access denied. Admins only.");
+            return;
+        }
+
         if(table.getSelectedRow() >= 0){
             String state = "lock";
             if("1".equals(tableModel.getValueAt(table.getSelectedRow(), 3) + "")){
@@ -250,6 +262,11 @@ public class MgmtUser extends javax.swing.JPanel {
     }//GEN-LAST:event_lockBtnActionPerformed
 
     private void chgpassBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chgpassBtnActionPerformed
+        if (currentUser.getRole() != 5) {
+            JOptionPane.showMessageDialog(this, "Access denied. Admins only.");
+            return;
+        }
+
         if(table.getSelectedRow() >= 0){
             JTextField password = new JPasswordField();
             JTextField confpass = new JPasswordField();
