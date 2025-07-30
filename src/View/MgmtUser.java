@@ -319,6 +319,12 @@ public class MgmtUser extends javax.swing.JPanel {
                     return;
                 }
 
+                String errorMessage = sqlite.validatePassword(password.getText().trim(), username);
+                if (errorMessage != null) {
+                    JOptionPane.showMessageDialog(this, errorMessage);
+                    return;
+                }
+
                 boolean success = sqlite.updateUserPassword(username, pass);
                 if (success) {
                     JOptionPane.showMessageDialog(null, "Password changed successfully.");
