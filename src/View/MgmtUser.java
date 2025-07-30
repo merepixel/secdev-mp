@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+import java.sql.Timestamp;
 
 /**
  *
@@ -181,6 +182,11 @@ public class MgmtUser extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void editRoleBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editRoleBtnActionPerformed
+        if (currentUser.getRole() != 5) {
+            JOptionPane.showMessageDialog(this, "Access denied. Admins only.");
+            return;
+        }
+        
         if(table.getSelectedRow() >= 0){
             String[] options = {"1-DISABLED","2-CLIENT","3-STAFF","4-MANAGER","5-ADMIN"};
             JComboBox optionList = new JComboBox(options);
@@ -197,6 +203,14 @@ public class MgmtUser extends javax.swing.JPanel {
                 boolean success = sqlite.updateUserRole(username, newRole);
                 if (success) {
                     JOptionPane.showMessageDialog(null, "User role updated.");
+                    Timestamp now = new Timestamp(System.currentTimeMillis());
+                    String targetUser = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
+                    sqlite.addLogs(
+                        "Edit User Role",
+                        currentUser.getUsername(),  
+                        "Changed role of user '" + targetUser + "' to " + newRole,
+                        now
+                    );
                     init(); // refresh table
                 } else {
                     JOptionPane.showMessageDialog(null, "Failed to update role.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -224,6 +238,14 @@ public class MgmtUser extends javax.swing.JPanel {
         if (result == JOptionPane.YES_OPTION) {
             sqlite.removeUser(selectedUsername);
             JOptionPane.showMessageDialog(null, "User has been deleted.");
+
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            sqlite.addLogs(
+                "Delete User",
+                currentUser.getUsername(),
+                "Deleted user '" + selectedUsername + "'",
+                now
+        );
             init(); // Refresh the user table
         }
     } else {
@@ -238,21 +260,24 @@ public class MgmtUser extends javax.swing.JPanel {
         }
 
         if(table.getSelectedRow() >= 0){
-            String state = "lock";
-            if("1".equals(tableModel.getValueAt(table.getSelectedRow(), 3) + "")){
-                state = "unlock";
-            }
+            String username = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
+            int currentLocked = Integer.parseInt(tableModel.getValueAt(table.getSelectedRow(), 3).toString());
+            int newLocked = (currentLocked == 1) ? 0 : 1;
+            String state = newLocked == 1 ? "Locked" : "Unlocked";
             
             int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to " + state + " " + tableModel.getValueAt(table.getSelectedRow(), 0) + "?", "DELETE USER", JOptionPane.YES_NO_OPTION);
             
             if (result == JOptionPane.YES_OPTION) {
-                String username = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
-                int currentLocked = Integer.parseInt(tableModel.getValueAt(table.getSelectedRow(), 3).toString());
-                int newLocked = (currentLocked == 1) ? 0 : 1;
-
                 boolean success = sqlite.updateUserLockState(username, newLocked);
                 if (success) {
                     JOptionPane.showMessageDialog(null, "User lock state updated.");
+                    Timestamp now = new Timestamp(System.currentTimeMillis());
+                    sqlite.addLogs(
+                        state + " User",
+                        currentUser.getUsername(),
+                        state + " user: " + username,
+                        now
+                    );
                     init(); // refresh
                 } else {
                     JOptionPane.showMessageDialog(null, "Failed to update lock state.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -297,6 +322,13 @@ public class MgmtUser extends javax.swing.JPanel {
                 boolean success = sqlite.updateUserPassword(username, pass);
                 if (success) {
                     JOptionPane.showMessageDialog(null, "Password changed successfully.");
+                    Timestamp now = new Timestamp(System.currentTimeMillis());
+                    sqlite.addLogs(
+                        "Changed Password",
+                        currentUser.getUsername(),
+                        "Changed password for user: " + username,
+                        now
+                    );
                     init(); // optional
                 } else {
                     JOptionPane.showMessageDialog(null, "Failed to change password.", "Error", JOptionPane.ERROR_MESSAGE);
