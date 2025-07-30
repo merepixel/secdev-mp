@@ -56,6 +56,10 @@ public class MgmtUser extends javax.swing.JPanel {
                 users.get(nCtr).getRole(), 
                 users.get(nCtr).getLocked()});
         }
+        // Hide the password column (column index 1)
+        table.getColumnModel().getColumn(1).setMinWidth(0);
+        table.getColumnModel().getColumn(1).setMaxWidth(0);
+        table.getColumnModel().getColumn(1).setWidth(0);
     }
 
     public void designer(JTextField component, String text){
